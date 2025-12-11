@@ -2,10 +2,18 @@
 # ==========================
 
 sql_server:
+  # Lokale Verbindung (im Buero-Netzwerk)
   host: "192.168.16.202\\SQLEXPRESS"
   database: "WorkM001"
   driver: "SQL Server"
   timeout: 30
+
+  # Remote-Verbindung via Cloudflare Tunnel
+  # WICHTIG: Tunnel muss vorher gestartet werden:
+  #   cloudflared access tcp --hostname sql.js-fenster-intern.org --url localhost:1433
+  remote:
+    host: "localhost"
+    tunnel_command: "cloudflared access tcp --hostname sql.js-fenster-intern.org --url localhost:1433"
 
   # Verbindungseinstellungen
   connection:

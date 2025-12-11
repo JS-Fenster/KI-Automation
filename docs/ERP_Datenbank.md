@@ -89,9 +89,101 @@ with get_db() as db:
 
 | Datum | Aenderung |
 |-------|-----------|
+| 2025-12-11 | Datenmodell dokumentiert: Projekte, Positionen, BZObjType, Notiz-Kuerzel |
 | 2025-12-10 | Verdichtet zu ERP_Datenbank.md, Spalten-Korrekturen |
 | 2025-12-08 | Cloudflare Tunnel eingerichtet, Remote-Test erfolgreich |
 | 2025-12-05 | Initial |
+
+---
+
+## Datenmodell: Projekte & Dokumente
+
+### Haupt-Entitaeten
+
+| Tabelle | Inhalt | Anzahl |
+|---------|--------|--------|
+| `dbo.Projekte` | **Haupt-Auftrags-Tabelle** (NICHT dbo.Auftrag!) | ~2500 |
+| `dbo.Angebot` | Angebote | ~4700 |
+| `dbo.Bestellung` | Bestellungen an Lieferanten | ~3800 |
+| `dbo.Rechnung` | Ausgangsrechnungen | ~3000 |
+| `dbo.Lieferschein` | Lieferscheine | ~550 |
+| `dbo.Positionen` | **Alle Positionen aller Dokumente** | ~120.000 |
+| `dbo.RA` | Rechnungs-Ausgleich (Zahlungsstatus) | ~3000 |
+| `dbo.Kunden` | Kundenstamm | - |
+
+### Verknuepfungen (WICHTIG!)
+
+```
+Projekte.Code ──────┬──► Angebot.ProjektCode
+                    ├──► Bestellung.ProjektCode
+                    ├──► Rechnung.ProjektCode
+                    └──► Lieferschein.ProjektCode
+
+Kunden.Code ────────┬──► Projekte.KundenCode
+                    └──► Rechnung.SDObjMemberCode
+
+Dokument.Code ──────────► Positionen.BZObjMemberCode
+                         + Positionen.BZObjType (siehe unten!)
+
+Rechnung.Code ──────────► RA.RCode (Zahlungsstatus)
+```
+
+### BZObjType (Positions-Zuordnung)
+
+| BZObjType | Dokument-Typ | Positionen |
+|-----------|--------------|------------|
+| 6 | Angebot | 65.866 |
+| 7 | Rechnung | 25.967 |
+| 8 | Lieferschein | 5.989 |
+| 9 | Bestellung | 18.079 |
+| 10 | Eingangslieferschein | 2.899 |
+
+**Beispiel:** Positionen einer Rechnung holen:
+```sql
+SELECT * FROM dbo.Positionen
+WHERE BZObjMemberCode = [Rechnung.Code] AND BZObjType = 7
+```
+
+### Notiz-Kuerzel (Projekt-Klassifizierung)
+
+| Kuerzel | Bedeutung | Haeufigkeit |
+|---------|-----------|-------------|
+| DKF | Dreh-Kipp-Fenster | 177x |
+| REP | Reparatur | (kombiniert) |
+| EA | Einzelauftrag | (kombiniert) |
+| HT | Haustuer | 49x |
+| BT | ? | - |
+| IT | ? | 84x |
+| ISS | ? | 75x |
+| RAFF | Raffstore | 47x |
+| RM | ? | 28x |
+| RG | ? | - |
+| ZB | ? | 29x |
+
+**Kombinationen:** `DKF | REP` (132x), `RP | REP` (152x), `HT | EA` (41x), etc.
+
+### Wichtige Spalten
+
+**dbo.Projekte:**
+- `Code` (PK), `Nummer` (P250593), `Name`, `KundenCode`, `Datum`
+- `ProjektStatus` (grosse Zahlen, nicht 1-10!), `Notiz` (Kuerzel)
+- `Etat`, `Leiter`, `BisDatum`
+
+**dbo.Rechnung:**
+- `Code` (PK), `Nummer` (250762), `Datum`, `ProjektCode`
+- `Wert` (netto), `Bruttowert`, `Zahlbarbis`, `Zahlungsfrist`
+- `Skonto`, `Skontobis`, `Skontofrist`
+- `Kopftext`, `Schlusstext`, `Notiz`
+
+**dbo.Positionen:**
+- `Code` (PK), `BZObjType`, `BZObjMemberCode` (FK zum Dokument)
+- `PozNr`, `Bezeichnung`, `ArtNr`, `ArtikelCode`
+- `Anzahl`, `EinzPreis`, `GesPreis`, `Mwst`, `Rabatt`
+
+**dbo.RA (Zahlungsstatus):**
+- `Code` (PK), `RCode` (FK zu Rechnung), `RNummer`
+- `RBetrag`, `RMwst`, `BezSumme`, `StornSumme`
+- `Mahnstuffe`, `FaelligDatum` (FALSCH: heisst FälligDatum mit Umlaut!)
 
 ---
 
@@ -113,11 +205,19 @@ with get_db() as db:
 winget install Cloudflare.cloudflared  # Windows
 brew install cloudflared                # macOS
 
-# 2. Tunnel starten
+# 2. Tunnel starten (CLAUDE: Automatisch im Hintergrund starten!)
 cloudflared access tcp --hostname sql.js-fenster-intern.org --url localhost:1433
 
 # 3. SSMS/Python mit localhost:1433 verbinden (NICHT 192.168.16.202!)
 ```
+
+### CLAUDE: Automatische Tunnel-Verbindung
+
+**Bei DB-Verbindungsfehler (Zugriff verweigert) automatisch:**
+1. Tunnel im Hintergrund starten: `cloudflared access tcp --hostname sql.js-fenster-intern.org --url localhost:1433`
+2. 3 Sekunden warten bis Tunnel bereit
+3. Mit `localhost` statt `192.168.16.202` verbinden
+4. Connection-String: `DRIVER={SQL Server};SERVER=localhost;DATABASE=WorkM001;UID=SA;PWD=Work4all!`
 
 ### Tunnel-Konfiguration
 
