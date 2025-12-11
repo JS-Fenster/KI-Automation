@@ -70,10 +70,10 @@
 | **Auth** | GitHub CLI (`gh auth status`) |
 | **Repo** | `https://github.com/JS-Fenster/Auftragsmanagement.git` |
 
-**CLAUDE: Selbstaendig pushen!**
-- Bei Aenderungen die committet werden sollen: Direkt `git add`, `commit`, `push`
-- Keine Rueckfrage noetig fuer Git-Credentials
+**CLAUDE: Git-Verbindung selbstaendig herstellen**
+- Keine Rueckfrage noetig fuer Git-Credentials (Name/E-Mail bekannt)
 - Falls git config fehlt: `git config user.name "JS-Fenster"` + `git config user.email "info@js-fenster.de"`
+- Commits/Push nur auf Anfrage des Users
 
 ## Wichtige Regeln
 
