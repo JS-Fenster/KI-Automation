@@ -1,0 +1,94 @@
+# KI-Wissensdatenbank Konfiguration (Portable)
+# Passe diese Datei an deine Interessen an!
+
+update_interval_days: 7
+
+# RSS-Quellen (füge eigene hinzu mit --add-source)
+sources:
+  openai:
+    name: OpenAI Blog
+    type: rss
+    url: https://openai.com/blog/rss.xml
+    priority: 1
+
+  google_ai:
+    name: Google AI Blog
+    type: rss
+    url: https://blog.google/technology/ai/rss/
+    priority: 1
+
+  huggingface:
+    name: Hugging Face Blog
+    type: rss
+    url: https://huggingface.co/blog/feed.xml
+    priority: 2
+
+  deepmind:
+    name: Google DeepMind
+    type: rss
+    url: https://deepmind.google/blog/rss.xml
+    priority: 2
+
+  techcrunch_ai:
+    name: TechCrunch AI
+    type: rss
+    url: https://techcrunch.com/category/artificial-intelligence/feed/
+    priority: 3
+
+  the_verge_ai:
+    name: The Verge AI
+    type: rss
+    url: https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
+    priority: 3
+
+  langchain:
+    name: LangChain Blog
+    type: rss
+    url: https://blog.langchain.com/rss/
+    priority: 2
+
+  llamaindex:
+    name: LlamaIndex Blog
+    type: rss
+    url: https://medium.com/feed/llamaindex-blog
+    priority: 3
+
+  n8n_blog:
+    name: n8n Blog
+    type: rss
+    url: https://blog.n8n.io/rss
+    priority: 3
+
+  ai_news:
+    name: AI News
+    type: rss
+    url: https://www.artificialintelligence-news.com/feed/
+    priority: 3
+
+# Relevante Themen - passe an deine Projekte an!
+relevant_topics:
+  # KI-Modelle
+  - claude
+  - gpt
+  - gemini
+  - llama
+  - mistral
+
+  # Technologien
+  - agent
+  - rag
+  - langchain
+  - llamaindex
+  - mcp
+
+  # Anwendungen
+  - automation
+  - workflow
+  - api
+  - vision
+  - ocr
+
+  # Entwicklung
+  - fine-tuning
+  - embedding
+  - prompt

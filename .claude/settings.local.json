@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(python ki_wissen_updater.py:*)",
+      "Bash(dir \"Z:\\IT-Sammlung\\KI_Automation\\lib\")",
+      "Bash(dir \"Z:\\IT-Sammlung\\KI_Automation\\.claude_md_backups\")",
+      "Bash(dir:*)",
+      "Bash(del \"Z:\\IT-Sammlung\\KI_Automation\\KI_Wissen\\CLAUDE.md\")",
+      "Bash(python lib/claude_md_helper.py:*)",
+      "Bash(schtasks /create /tn \"KI_Wissen_Update\" /xml \"Z:\\IT-Sammlung\\KI_Automation\\KI_Wissen\\KI_Wissen_Update_Task.xml\")",
+      "Bash(cmd //c 'schtasks /create /tn \"\"KI_Wissen_Update\"\" /xml \"\"Z:\\IT-Sammlung\\KI_Automation\\KI_Wissen\\KI_Wissen_Update_Task.xml\"\"')",
+      "Bash(powershell -Command \"schtasks /create /tn ''KI_Wissen_Update'' /xml ''Z:\\IT-Sammlung\\KI_Automation\\KI_Wissen\\KI_Wissen_Update_Task.xml''\")",
+      "Bash(powershell -Command \"schtasks /query /tn ''KI_Wissen_Update'' /v /fo LIST | Select-String -Pattern ''Aufgabenname|Status|N.chste|Autor|Start''\")",
+      "Bash(claude doctor:*)"
+    ]
+  }
+}

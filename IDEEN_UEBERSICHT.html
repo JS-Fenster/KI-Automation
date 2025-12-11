@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Fenster & Türen - KI-Automatisierung Ideen</title>
+    <style>
+        :root {
+            --phase1: #22c55e;
+            --phase2: #3b82f6;
+            --phase3: #f59e0b;
+            --phase4: #8b5cf6;
+            --phase5: #ef4444;
+            --bg: #1a1a2e;
+            --card: #16213e;
+            --text: #eee;
+            --border: #0f3460;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+        }
+        h1 { text-align: center; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+
+        /* Dropdown Filter System */
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .filter-dropdown {
+            position: relative;
+            width: 160px;
+        }
+        .filter-toggle {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .filter-toggle:hover {
+            border-color: #666;
+        }
+        .filter-toggle .arrow {
+            transition: transform 0.2s;
+        }
+        .filter-dropdown.open .filter-toggle .arrow {
+            transform: rotate(180deg);
+        }
+        .filter-menu {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            width: 100%;
+            background: var(--card);
+            border: 2px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s;
+            z-index: 100;
+        }
+        .filter-dropdown.open .filter-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .filter-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 13px;
+            border-left: 3px solid transparent;
+        }
+        .filter-option:hover {
+            background: var(--border);
+        }
+        .filter-option.selected {
+            background: rgba(255,255,255,0.1);
+        }
+        /* Farben für Optionen */
+        .filter-option[data-value="1"].phase-opt { border-left-color: var(--phase1); }
+        .filter-option[data-value="2"].phase-opt { border-left-color: var(--phase2); }
+        .filter-option[data-value="3"].phase-opt { border-left-color: var(--phase3); }
+        .filter-option[data-value="4"].phase-opt { border-left-color: var(--phase4); }
+        .filter-option[data-value="5"].phase-opt { border-left-color: var(--phase5); }
+        .filter-option[data-value="1"].complexity-opt { border-left-color: #22c55e; }
+        .filter-option[data-value="2"].complexity-opt { border-left-color: #eab308; }
+        .filter-option[data-value="3"].complexity-opt { border-left-color: #f97316; }
+        .filter-option[data-value="4"].complexity-opt { border-left-color: #ef4444; }
+        .filter-option[data-value="offen"].status-opt { border-left-color: #3b82f6; }
+        .filter-option[data-value="fertig"].status-opt { border-left-color: #22c55e; }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .card[data-phase="1"] { border-color: var(--phase1); }
+        .card[data-phase="2"] { border-color: var(--phase2); }
+        .card[data-phase="3"] { border-color: var(--phase3); }
+        .card[data-phase="4"] { border-color: var(--phase4); }
+        .card[data-phase="5"] { border-color: var(--phase5); }
+
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .card-id {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+        }
+        .card-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+        .card-desc { font-size: 14px; color: #aaa; margin-bottom: 15px; }
+
+        .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+        .tag {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.1);
+        }
+        .tag.complexity-1 { background: rgba(34,197,94,0.3); }
+        .tag.complexity-2 { background: rgba(234,179,8,0.3); }
+        .tag.complexity-3 { background: rgba(249,115,22,0.3); }
+        .tag.complexity-4 { background: rgba(239,68,68,0.3); }
+
+        .dependencies { font-size: 12px; color: #888; }
+        .dependencies span { color: #6ee7b7; }
+
+        /* Connections Section */
+        .connections { margin-top: 40px; padding: 20px; background: var(--card); border-radius: 12px; }
+        .connections h2 { margin-bottom: 20px; }
+        .conn-diagram { font-family: monospace; font-size: 13px; white-space: pre; overflow-x: auto; line-height: 1.4; }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat {
+            background: var(--card);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-value { font-size: 32px; font-weight: bold; }
+        .stat-label { font-size: 12px; color: #888; }
+
+        /* Legend */
+        .legend { display: flex; gap: 20px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+        /* Hidden class for filtering */
+        .hidden { display: none !important; }
+
+        /* NEW Badge */
+        .new-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+
+        /* Architecture Visualization */
+        .architecture {
+            margin: 40px 0;
+            padding: 30px;
+            background: var(--card);
+            border-radius: 12px;
+        }
+        .architecture h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .arch-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .arch-layer {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+        }
+        .arch-layer::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 10px;
+            top: -12px;
+            background: var(--bg);
+            padding: 2px 10px;
+            font-size: 11px;
+            color: #888;
+            border-radius: 4px;
+        }
+        .layer-input { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); }
+        .layer-hub { background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); }
+        .layer-process { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); }
+        .layer-output { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); }
+        .layer-data { background: rgba(234,179,8,0.15); border: 1px solid rgba(234,179,8,0.3); }
+
+        .arch-node {
+            background: var(--bg);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+            min-width: 100px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .arch-node:hover {
+            transform: scale(1.05);
+            border-color: #fff;
+        }
+        .arch-node .node-id {
+            font-weight: bold;
+            color: #ffffff;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .arch-node.central {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            font-weight: bold;
+            min-width: 180px;
+            padding: 15px 20px;
+        }
+        .arch-node.hub {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .arch-arrow {
+            display: flex;
+            justify-content: center;
+            color: #666;
+            font-size: 24px;
+        }
+        .arch-arrow-side {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        /* Cluster Groups */
+        .cluster {
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 5px;
+        }
+        .cluster-label {
+            font-size: 10px;
+            color: #888;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .cluster-nodes {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: var(--card);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover, .tab-btn.active {
+            background: var(--border);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Fertige Karten */
+        .card[data-status="fertig"] {
+            border-color: #22c55e !important;
+            background: linear-gradient(135deg, #16213e 0%, #1a3a2a 100%);
+            opacity: 0.85;
+        }
+        .card[data-status="fertig"]:hover {
+            opacity: 1;
+        }
+        .status-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+        .status-badge.fertig {
+            background: #22c55e;
+            color: #000;
+        }
+        .status-badge.in-arbeit {
+            background: #f59e0b;
+            color: #000;
+        }
+
+        /* Counter Badge */
+        .filter-count {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>KI-Automatisierung - Ideensammlung</h1>
+    <p class="subtitle">JS Fenster & Türen | Stand: Dezember 2025</p>
+
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-value" style="color: var(--phase1)">64</div>
+            <div class="stat-label">Tool-Ideen</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color: var(--phase1)">1</div>
+            <div class="stat-label">Umgesetzt</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color: #ff6b6b">4</div>
+            <div class="stat-label">Infrastruktur</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color: var(--phase5)">9</div>
+            <div class="stat-label">KI-Komplex</div>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background: #ff6b6b"></div> Phase 0: Infrastruktur (ZUERST!)</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--phase1)"></div> Phase 1: Basis-Module</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--phase2)"></div> Phase 2: Kernprozesse</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--phase3)"></div> Phase 3: Kommunikation</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--phase4)"></div> Phase 4: Command Center</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--phase5)"></div> Phase 5: KI-Features</div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('overview')">Architektur-Übersicht</button>
+        <button class="tab-btn" onclick="showTab('cards')">Alle Tools (Karten)</button>
+    </div>
+
+    <!-- ARCHITECTURE OVERVIEW -->
+    <div id="tab-overview" class="tab-content active">
+        <div class="architecture">
+            <h2>System-Architektur: Phasen-basiert (Infrastruktur zuerst!)</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">Aufbau wie ein Gebaeude: Fundament → Module → Dashboard</p>
+
+            <div class="arch-container">
+                <!-- PHASE 4: COMMAND CENTER (OBEN) -->
+                <div class="arch-layer" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" data-label="PHASE 4: COMMAND CENTER">
+                    <div class="arch-node central" title="#14 Command Center" style="background: white; color: #333; min-width: 300px;">
+                        <span class="node-id">#14</span>
+                        Command Center<br>
+                        <small style="display: flex; gap: 5px; justify-content: center; margin-top: 5px;">
+                            <span style="background: #eee; padding: 2px 6px; border-radius: 3px;">Heute</span>
+                            <span style="background: #eee; padding: 2px 6px; border-radius: 3px;">Bestellungen</span>
+                            <span style="background: #eee; padding: 2px 6px; border-radius: 3px;">Montage</span>
+                            <span style="background: #eee; padding: 2px 6px; border-radius: 3px;">Finanzen</span>
+                            <span style="background: #eee; padding: 2px 6px; border-radius: 3px;">KPIs</span>
+                        </small>
+                    </div>
+                </div>
+
+                <div class="arch-arrow">▲</div>
+
+                <!-- PHASE 3: KOMMUNIKATION -->
+                <div class="arch-layer" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);" data-label="PHASE 3: KOMMUNIKATION">
+                    <div class="arch-node" title="#12 E-Mail-Verarbeitung">
+                        <span class="node-id">#12</span>
+                        E-Mail
+                    </div>
+                    <div class="arch-node" title="#6 Budget-Angebot">
+                        <span class="node-id">#6</span>
+                        Angebote
+                    </div>
+                    <div class="arch-node" title="#45 Angebots-Reminder">
+                        <span class="node-id">#45</span>
+                        Reminder
+                    </div>
+                    <div class="arch-node" title="#50 Zahlungserinnerung">
+                        <span class="node-id">#50</span>
+                        Mahnung
+                    </div>
+                </div>
+
+                <div class="arch-arrow">▲</div>
+
+                <!-- PHASE 2: KERNPROZESSE -->
+                <div class="arch-layer layer-process" data-label="PHASE 2: KERNPROZESSE">
+                    <div class="cluster">
+                        <div class="cluster-label">BESTELLUNGEN ⭐</div>
+                        <div class="cluster-nodes">
+                            <div class="arch-node" title="#55 Pflichtfelder" style="border: 2px solid gold;">
+                                <span class="node-id">#55</span>
+                                Pflichtfelder
+                            </div>
+                            <div class="arch-node" title="#56 AB-Abgleich" style="border: 2px solid gold;">
+                                <span class="node-id">#56</span>
+                                AB-Abgleich
+                            </div>
+                            <div class="arch-node" title="#36 Beschaffungs-Dashboard">
+                                <span class="node-id">#36</span>
+                                Dashboard
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cluster">
+                        <div class="cluster-label">AUFTRAEGE</div>
+                        <div class="cluster-nodes">
+                            <div class="arch-node" title="#10 Auftraege">
+                                <span class="node-id">#10</span>
+                                Auftraege
+                            </div>
+                            <div class="arch-node" title="#32 Projekte">
+                                <span class="node-id">#32</span>
+                                Projekte
+                            </div>
+                            <div class="arch-node" title="#9 Reparatur">
+                                <span class="node-id">#9</span>
+                                Reparatur
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arch-arrow">▲</div>
+
+                <!-- PHASE 1: BASIS-MODULE -->
+                <div class="arch-layer" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);" data-label="PHASE 1: BASIS-MODULE">
+                    <div class="arch-node" title="#57 Lieferadressen-Logik" style="border: 3px solid gold; background: white; color: #333;">
+                        <span class="node-id">#57 ⭐</span>
+                        Lieferadressen
+                    </div>
+                    <div class="arch-node" title="#39 Montage-Mappe">
+                        <span class="node-id">#39</span>
+                        Montage-Mappe
+                    </div>
+                    <div class="arch-node" title="#40 Kommissionierliste">
+                        <span class="node-id">#40</span>
+                        Material-Liste
+                    </div>
+                    <div class="arch-node" title="#1 Preislisten">
+                        <span class="node-id">#1</span>
+                        Preislisten
+                    </div>
+                    <div class="arch-node" title="#4 KI-Wissen" style="background: #4CAF50;">
+                        <span class="node-id">#4 ✓</span>
+                        KI-Wissen
+                    </div>
+                </div>
+
+                <div class="arch-arrow">▲</div>
+
+                <!-- PHASE 0: INFRASTRUKTUR (FUNDAMENT) -->
+                <div class="arch-layer" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);" data-label="PHASE 0: INFRASTRUKTUR ⚡ ZUERST!">
+                    <div class="arch-node" title="#58 Web-Plattform" style="background: white; color: #333; border: 3px solid #ff6b6b;">
+                        <span class="node-id">#58</span>
+                        Web-Plattform<br>
+                        <small>Flask + Bootstrap</small>
+                    </div>
+                    <div class="arch-node" title="#59 DB-Connector" style="background: white; color: #333; border: 3px solid #ff6b6b;">
+                        <span class="node-id">#59</span>
+                        DB-Connector<br>
+                        <small>pyodbc + W4A</small>
+                    </div>
+                    <div class="arch-node" title="#60 Auth" style="background: white; color: #333; border: 3px solid #ff6b6b;">
+                        <span class="node-id">#60</span>
+                        Auth & Rollen<br>
+                        <small>Login-System</small>
+                    </div>
+                </div>
+
+                <!-- EXTERNE SYSTEME -->
+                <div class="arch-arrow">▲ ▼</div>
+
+                <div class="arch-layer layer-data" data-label="EXTERNE SYSTEME">
+                    <div class="arch-node" title="Work4all ERP">
+                        <span class="node-id">W4A</span>
+                        Work4all
+                    </div>
+                    <div class="arch-node" title="SQL Server">
+                        <span class="node-id">SQL</span>
+                        SQL Server
+                    </div>
+                    <div class="arch-node" title="E-Mail Server">
+                        <span class="node-id">Mail</span>
+                        E-Mail
+                    </div>
+                    <div class="arch-node" title="Cloudflare Tunnel">
+                        <span class="node-id">CF</span>
+                        Tunnel
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legende fuer Architektur -->
+            <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #888;">
+                <span style="margin-right: 20px; padding: 3px 8px; background: #ff6b6b; color: white; border-radius: 3px;">Phase 0: Infrastruktur</span>
+                <span style="margin-right: 20px; padding: 3px 8px; background: #f5576c; color: white; border-radius: 3px;">Phase 1: Basis</span>
+                <span style="margin-right: 20px; padding: 3px 8px; background: var(--phase2); color: white; border-radius: 3px;">Phase 2: Kern</span>
+                <span style="margin-right: 20px; padding: 3px 8px; background: #38ef7d; color: #333; border-radius: 3px;">Phase 3: Komm.</span>
+                <span style="padding: 3px 8px; background: #667eea; color: white; border-radius: 3px;">Phase 4: Dashboard</span>
+            </div>
+        </div>
+
+        <!-- Aufbau-Reihenfolge -->
+        <div class="architecture" style="margin-top: 20px;">
+            <h2>Aufbau-Reihenfolge (Bottom-Up)</h2>
+            <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; padding: 20px;">
+                <div class="arch-node" style="background: #ff6b6b;">
+                    <span class="node-id">1.</span>
+                    Infrastruktur<br>
+                    <small>#58, #59, #60, #64</small>
+                </div>
+                <span style="color: #666; font-size: 20px;">→</span>
+                <div class="arch-node" style="background: #f5576c;">
+                    <span class="node-id">2.</span>
+                    Erstes Tool<br>
+                    <small>#57 Lieferadr.</small>
+                </div>
+                <span style="color: #666; font-size: 20px;">→</span>
+                <div class="arch-node" style="background: var(--phase2);">
+                    <span class="node-id">3.</span>
+                    Bestellungen<br>
+                    <small>#55, #56, #36</small>
+                </div>
+                <span style="color: #666; font-size: 20px;">→</span>
+                <div class="arch-node" style="background: #38ef7d; color: #333;">
+                    <span class="node-id">4.</span>
+                    E-Mail & Co<br>
+                    <small>#12, #6, #45</small>
+                </div>
+                <span style="color: #666; font-size: 20px;">→</span>
+                <div class="arch-node" style="background: #667eea;">
+                    <span class="node-id">5.</span>
+                    Command Center<br>
+                    <small>#14 vereint alles</small>
+                </div>
+            </div>
+            <p style="text-align: center; color: #888; font-size: 12px; margin-top: 10px;">
+                ⭐ Goldene Rahmen = Prioritaet | ✓ = Fertig | Responsive Web-App fuer alle Geraete
+            </p>
+        </div>
+    </div>
+
+    <!-- CARDS VIEW -->
+    <div id="tab-cards" class="tab-content">
+
+    <!-- Kompakte Filter-Leiste -->
+    <div class="filter-bar">
+        <!-- Status Dropdown -->
+        <div class="filter-dropdown" id="status-dropdown">
+            <button class="filter-toggle" onclick="toggleDropdown('status-dropdown')">
+                <span id="status-label">Alle (35)</span>
+                <span class="arrow">▼</span>
+            </button>
+            <div class="filter-menu">
+                <div class="filter-option status-opt selected" data-value="all" onclick="selectFilter('status', 'all', 'Alle')">Alle</div>
+                <div class="filter-option status-opt" data-value="offen" onclick="selectFilter('status', 'offen', 'Offen')">Offen</div>
+                <div class="filter-option status-opt" data-value="fertig" onclick="selectFilter('status', 'fertig', 'Fertig ✓')">Fertig ✓</div>
+            </div>
+        </div>
+
+        <!-- Phase Dropdown -->
+        <div class="filter-dropdown" id="phase-dropdown">
+            <button class="filter-toggle" onclick="toggleDropdown('phase-dropdown')">
+                <span id="phase-label">Alle Phasen</span>
+                <span class="arrow">▼</span>
+            </button>
+            <div class="filter-menu">
+                <div class="filter-option phase-opt selected" data-value="all" onclick="selectFilter('phase', 'all', 'Alle Phasen')">Alle Phasen</div>
+                <div class="filter-option phase-opt" data-value="0" onclick="selectFilter('phase', '0', 'Phase 0')">Phase 0 - Infrastruktur ⚡</div>
+                <div class="filter-option phase-opt" data-value="1" onclick="selectFilter('phase', '1', 'Phase 1')">Phase 1 - Basis-Module</div>
+                <div class="filter-option phase-opt" data-value="2" onclick="selectFilter('phase', '2', 'Phase 2')">Phase 2 - Kernprozesse</div>
+                <div class="filter-option phase-opt" data-value="3" onclick="selectFilter('phase', '3', 'Phase 3')">Phase 3 - Kommunikation</div>
+                <div class="filter-option phase-opt" data-value="4" onclick="selectFilter('phase', '4', 'Phase 4')">Phase 4 - Command Center</div>
+                <div class="filter-option phase-opt" data-value="5" onclick="selectFilter('phase', '5', 'Phase 5')">Phase 5 - KI-Features</div>
+            </div>
+        </div>
+
+        <!-- Komplexität Dropdown -->
+        <div class="filter-dropdown" id="complexity-dropdown">
+            <button class="filter-toggle" onclick="toggleDropdown('complexity-dropdown')">
+                <span id="complexity-label">Alle Stufen</span>
+                <span class="arrow">▼</span>
+            </button>
+            <div class="filter-menu">
+                <div class="filter-option complexity-opt selected" data-value="all" onclick="selectFilter('complexity', 'all', 'Alle Stufen')">Alle Stufen</div>
+                <div class="filter-option complexity-opt" data-value="1" onclick="selectFilter('complexity', '1', 'Einfach')">Einfach</div>
+                <div class="filter-option complexity-opt" data-value="2" onclick="selectFilter('complexity', '2', 'Mittel')">Mittel</div>
+                <div class="filter-option complexity-opt" data-value="3" onclick="selectFilter('complexity', '3', 'Anspruchsvoll')">Anspruchsvoll</div>
+                <div class="filter-option complexity-opt" data-value="4" onclick="selectFilter('complexity', '4', 'Komplex')">Komplex</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="grid" id="cards-grid">
+        <!-- PHASE 1: QUICK WINS -->
+        <div class="card" data-phase="1" data-id="1" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#1</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Preislisten-Tool</div>
+            <div class="card-desc">PDF-Preislisten automatisch in Excel-Artikelstamm importieren (ROKA, Weru, etc.)</div>
+            <div class="tags">
+                <span class="tag">PDF-Parsing</span>
+                <span class="tag">Excel</span>
+                <span class="tag">Python</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#6 Budget-Angebot</span></div>
+        </div>
+
+        <div class="card" data-phase="1" data-id="4" data-status="fertig" data-complexity="1">
+            <div class="card-header">
+                <span class="card-id">#4 <span class="status-badge fertig">FERTIG</span></span>
+                <span class="tag complexity-1">Einfach</span>
+            </div>
+            <div class="card-title">KI-Wissensdatenbank</div>
+            <div class="card-desc">Selbst-aktualisierende Wissensdatei mit aktuellen KI/Automation-Entwicklungen. Wöchentliches Update via Task Scheduler.</div>
+            <div class="tags">
+                <span class="tag">Claude</span>
+                <span class="tag">RSS-Feeds</span>
+                <span class="tag">Markdown</span>
+            </div>
+            <div class="dependencies">Implementiert: <span>ki_wissen_updater.py</span></div>
+        </div>
+
+        <div class="card" data-phase="1" data-id="13" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#13</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Inventar-Verwaltung</div>
+            <div class="card-desc">Erweiterung Work4all: Rechnungslink, Fahrzeug-Tracking, QR-Codes, Ausleihe</div>
+            <div class="tags">
+                <span class="tag">Work4all</span>
+                <span class="tag">SQL Server</span>
+                <span class="tag">Mobile App</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>dbo.Inventar, dbo.Lagerort</span></div>
+        </div>
+
+        <!-- PHASE 2: KERNPROZESSE -->
+        <div class="card" data-phase="2" data-id="9" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#9</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Reparatur-Verwaltung</div>
+            <div class="card-desc">Reklamationen erfassen, Garantie prüfen, Status-Tracking, Foto-Dokumentation</div>
+            <div class="tags">
+                <span class="tag">SQL Server</span>
+                <span class="tag">Workflow</span>
+                <span class="tag">Tickets</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#11 Termine, #12 E-Mail</span></div>
+        </div>
+
+        <div class="card" data-phase="2" data-id="10" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#10</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Aufträge & Lieferungen</div>
+            <div class="card-desc">Zentrale Auftragsverwaltung: Aufträge, Abholungen, Lieferungen mit/ohne Montage</div>
+            <div class="tags">
+                <span class="tag">SQL Server</span>
+                <span class="tag">Logistik</span>
+                <span class="tag">Lieferscheine</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#6 Angebot, #11 Termine</span></div>
+        </div>
+
+        <div class="card" data-phase="2" data-id="11" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#11</span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Terminfindung</div>
+            <div class="card-desc">Intelligente Terminplanung für Aufmaße, Beratungen, Montagen mit Ressourcenplanung</div>
+            <div class="tags">
+                <span class="tag">Kalender</span>
+                <span class="tag">Exchange</span>
+                <span class="tag">Geo-Optimierung</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#22 Routen, dbo.Termine</span></div>
+        </div>
+
+        <div class="card" data-phase="2" data-id="22" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#22</span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Routenplanung</div>
+            <div class="card-desc">Intelligente Tourenoptimierung: Fahrzeit minimieren, Termine clustern, ROI: 292 Std/Jahr</div>
+            <div class="tags">
+                <span class="tag">Google Maps</span>
+                <span class="tag">OR-Tools</span>
+                <span class="tag">Cluster</span>
+            </div>
+            <div class="dependencies">Erweitert: <span>#11 Termine</span></div>
+        </div>
+
+        <!-- PHASE 3: KOMMUNIKATION -->
+        <div class="card" data-phase="3" data-id="3" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#3</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Weru Förderanträge</div>
+            <div class="card-desc">Automatisches Ausfüllen von Förderanträgen über Weru Portal (KfW, BAFA)</div>
+            <div class="tags">
+                <span class="tag">Web-Automation</span>
+                <span class="tag">Formulare</span>
+                <span class="tag">Weru Portal</span>
+            </div>
+            <div class="dependencies">Standalone - Portal-Zugang nötig</div>
+        </div>
+
+        <div class="card" data-phase="3" data-id="6" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#6</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Budget-Angebots-Generator</div>
+            <div class="card-desc">Automatische Budget-Angebote aus Elementlisten oder manueller Eingabe</div>
+            <div class="tags">
+                <span class="tag">Excel</span>
+                <span class="tag">PDF</span>
+                <span class="tag">Kalkulation</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#1 Preise, #5 Bauplan</span></div>
+        </div>
+
+        <div class="card" data-phase="3" data-id="12" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#12</span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">E-Mail-Verarbeitung</div>
+            <div class="card-desc">Automatische Klassifizierung, Kunden-Zuordnung, Workflow-Trigger, Antwort-Vorschläge</div>
+            <div class="tags">
+                <span class="tag">LLM</span>
+                <span class="tag">Exchange</span>
+                <span class="tag">SQL Server</span>
+            </div>
+            <div class="dependencies">Verbindet: <span>#6, #9, #10, #11</span></div>
+        </div>
+
+        <!-- PHASE 4: ANALYTICS -->
+        <div class="card" data-phase="4" data-id="2" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#2</span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Bilanz & GuV-Auswertung</div>
+            <div class="card-desc">Kennzahlen-Analyse, Trendprognosen, Branchenvergleich, Visualisierungen</div>
+            <div class="tags">
+                <span class="tag">Finanzen</span>
+                <span class="tag">DATEV</span>
+                <span class="tag">KI-Prognose</span>
+            </div>
+            <div class="dependencies">Standalone - Buchhaltungsdaten</div>
+        </div>
+
+        <div class="card" data-phase="4" data-id="14" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#14</span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Management-Dashboard</div>
+            <div class="card-desc">Zentrale KPI-Übersicht: Finanzen, Kunden, Prozesse, Ressourcen (Balanced Scorecard)</div>
+            <div class="tags">
+                <span class="tag">KPIs</span>
+                <span class="tag">Echtzeit</span>
+                <span class="tag">Alerts</span>
+            </div>
+            <div class="dependencies">Aggregiert: <span>ALLE Tools + Work4all</span></div>
+        </div>
+
+        <div class="card" data-phase="4" data-id="15" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#15</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Zeiterfassung & Auslastung</div>
+            <div class="card-desc">Projektbezogene Zeit, Auslastungsgrad, Kapazitätsplanung, GPS-Erfassung</div>
+            <div class="tags">
+                <span class="tag">Work4all</span>
+                <span class="tag">Mobile</span>
+                <span class="tag">GPS</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#11, #17</span></div>
+        </div>
+
+        <div class="card" data-phase="4" data-id="16" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#16</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Urlaubsverwaltung</div>
+            <div class="card-desc">Digitale Anträge, Teamkalender, automatische Vertretung, Kapazitätsprüfung</div>
+            <div class="tags">
+                <span class="tag">Work4all</span>
+                <span class="tag">Kalender</span>
+                <span class="tag">Workflow</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#11 Termine</span></div>
+        </div>
+
+        <div class="card" data-phase="4" data-id="17" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#17</span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Projekt-Deckungsbeitrag</div>
+            <div class="card-desc">Soll-Ist-Vergleich, Nachkalkulation, Budgetwarnung, Lerneffekt für Kalkulation</div>
+            <div class="tags">
+                <span class="tag">Controlling</span>
+                <span class="tag">Kalkulation</span>
+                <span class="tag">Analytics</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#15, Work4all</span></div>
+        </div>
+
+        <div class="card" data-phase="4" data-id="19" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#19</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Lieferanten-Bewertung</div>
+            <div class="card-desc">Automatische Bewertung: Liefertreue, Qualität, Preis, Kommunikation + Ranking</div>
+            <div class="tags">
+                <span class="tag">SQL Server</span>
+                <span class="tag">Scoring</span>
+                <span class="tag">Automatik</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>dbo.Lieferanten, dbo.Bestellung</span></div>
+        </div>
+
+        <!-- PHASE 5: KI-VOLLAUSBAU -->
+        <div class="card" data-phase="5" data-id="5" data-status="offen" data-complexity="4">
+            <div class="card-header">
+                <span class="card-id">#5</span>
+                <span class="tag complexity-4">Komplex</span>
+            </div>
+            <div class="card-title">Bauplan-Analyse</div>
+            <div class="card-desc">KI-Vision liest Baupläne: Fenster, Türen, Maße extrahieren, Elementlisten generieren</div>
+            <div class="tags">
+                <span class="tag">Claude Vision</span>
+                <span class="tag">OCR</span>
+                <span class="tag">CAD-Parser</span>
+            </div>
+            <div class="dependencies">Liefert an: <span>#6 Budget-Angebot</span></div>
+        </div>
+
+        <div class="card" data-phase="5" data-id="7" data-status="offen" data-complexity="4">
+            <div class="card-header">
+                <span class="card-id">#7</span>
+                <span class="tag complexity-4">Komplex</span>
+            </div>
+            <div class="card-title">Spracherkennung + KI-Analyse</div>
+            <div class="card-desc">Diktat + KI erkennt Material/Masse/Aktionen, stellt Rueckfragen, triggert Prozesse</div>
+            <div class="tags">
+                <span class="tag">Whisper</span>
+                <span class="tag">KI-Intent</span>
+                <span class="tag">Auto-Trigger</span>
+            </div>
+            <div class="dependencies">Nutzt von: <span>#39 Montage, #61 Aufmass</span></div>
+        </div>
+
+        <div class="card" data-phase="5" data-id="8" data-status="offen" data-complexity="4">
+            <div class="card-header">
+                <span class="card-id">#8</span>
+                <span class="tag complexity-4">Komplex</span>
+            </div>
+            <div class="card-title">Universal-Eingabe-Hub</div>
+            <div class="card-desc">Das "Gehirn": Bilder, E-Mails, Sprache, Formulare -> LLM Dispatcher -> Workflows</div>
+            <div class="tags">
+                <span class="tag">LLM</span>
+                <span class="tag">Omni-Channel</span>
+                <span class="tag">Router</span>
+            </div>
+            <div class="dependencies">Orchestriert: <span>ALLE Tools</span></div>
+        </div>
+
+        <div class="card" data-phase="5" data-id="18" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#18</span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Kundenportal</div>
+            <div class="card-desc">Self-Service: Auftragsstatus, Termine buchen, Dokumente, Reklamation melden</div>
+            <div class="tags">
+                <span class="tag">Web-Portal</span>
+                <span class="tag">Self-Service</span>
+                <span class="tag">Kunden</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#10, #11</span></div>
+        </div>
+
+        <div class="card" data-phase="5" data-id="20" data-status="offen" data-complexity="4">
+            <div class="card-header">
+                <span class="card-id">#20</span>
+                <span class="tag complexity-4">Komplex</span>
+            </div>
+            <div class="card-title">Qualitätsmanagement</div>
+            <div class="card-desc">Reklamations-Tracking, Fehler-Kategorisierung, KVP, Audit-Vorbereitung</div>
+            <div class="tags">
+                <span class="tag">ISO</span>
+                <span class="tag">KVP</span>
+                <span class="tag">Statistik</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#9, #17, #19</span></div>
+        </div>
+
+        <div class="card" data-phase="5" data-id="21" data-status="offen" data-complexity="4">
+            <div class="card-header">
+                <span class="card-id">#21</span>
+                <span class="tag complexity-4">Komplex</span>
+            </div>
+            <div class="card-title">Mobile Monteur-App</div>
+            <div class="card-desc">Unified App: Tagesplan, Navigation, Checklisten, Fotos, Unterschrift, Zeiterfassung</div>
+            <div class="tags">
+                <span class="tag">Flutter/React</span>
+                <span class="tag">Offline</span>
+                <span class="tag">GPS</span>
+            </div>
+            <div class="dependencies">Kombiniert: <span>#10, #11, #13, #15, #22</span></div>
+        </div>
+
+        <!-- #23 Verkaufschancen-Pipeline + Angebots-Reminder (inkl. ehem. #45) -->
+        <div class="card" data-phase="3" data-id="23" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#23</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Verkaufschancen + Reminder</div>
+            <div class="card-desc">Lead-Scoring + 2/7/14-Tage Follow-up, priorisiert nach Volumen</div>
+            <div class="tags">
+                <span class="tag">CRM</span>
+                <span class="tag">Scoring</span>
+                <span class="tag">Follow-up</span>
+                <span class="tag" style="background: #666;">+#45</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#12 E-Mail, #6 Angebot</span></div>
+        </div>
+
+        <!-- #24 Ticket-System + Schnell-Erfassung (inkl. ehem. #46) -->
+        <div class="card" data-phase="2" data-id="24" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#24</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Ticket + Schnell-Erfassung</div>
+            <div class="card-desc">Vorgangsnummer V-XXXX + 1-Klick Telefon-Erfassung, SLA-Tracking</div>
+            <div class="tags">
+                <span class="tag">Vorgangsnummer</span>
+                <span class="tag">SLA</span>
+                <span class="tag">Quick-Entry</span>
+                <span class="tag" style="background: #666;">+#46</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#9 Reparatur, #12 E-Mail</span></div>
+        </div>
+
+        <div class="card" data-phase="3" data-id="25" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#25 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Telefon-CRM Integration</div>
+            <div class="card-desc">Anrufer-Erkennung, automatischer Kundendaten-Popup, Gesprächsnotizen, Callback-Liste</div>
+            <div class="tags">
+                <span class="tag">CTI</span>
+                <span class="tag">CRM</span>
+                <span class="tag">TAPI</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>dbo.Kunden, Work4all</span></div>
+        </div>
+
+        <div class="card" data-phase="4" data-id="26" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#26 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Projekt-Aktivitäten-Tracking</div>
+            <div class="card-desc">Automatische Protokollierung aller Aktivitäten pro Projekt/Kunde, Timeline-Ansicht</div>
+            <div class="tags">
+                <span class="tag">Historie</span>
+                <span class="tag">Timeline</span>
+                <span class="tag">SQL Server</span>
+            </div>
+            <div class="dependencies">Aggregiert: <span>#9, #10, #11, #12</span></div>
+        </div>
+
+        <div class="card" data-phase="3" data-id="27" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#27 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Dokument-Intelligenz</div>
+            <div class="card-desc">Automatische Klassifizierung, OCR, Metadaten-Extraktion, Volltextsuche, Verknüpfung</div>
+            <div class="tags">
+                <span class="tag">DMS</span>
+                <span class="tag">OCR</span>
+                <span class="tag">LLM</span>
+            </div>
+            <div class="dependencies">Verbindet: <span>#5, #12, dbo.Dokumente</span></div>
+        </div>
+
+        <!-- #28 Digitales Aufmass + Mobiles Formular (inkl. ehem. #61) -->
+        <div class="card" data-phase="2" data-id="28" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#28</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Aufmass + Mobil + Zubehoer</div>
+            <div class="card-desc">Masserfassung + Fotos + auto. Zubehoer-Berechnung, Offline-faehig</div>
+            <div class="tags">
+                <span class="tag">Kalkulation</span>
+                <span class="tag">Aufmass</span>
+                <span class="tag">Mobil</span>
+                <span class="tag" style="background: #666;">+#61</span>
+            </div>
+            <div class="dependencies">Braucht: <span>#58</span> | Liefert an: <span>#6 Angebot</span></div>
+        </div>
+
+        <div class="card" data-phase="5" data-id="29" data-status="offen" data-complexity="1">
+            <div class="card-header">
+                <span class="card-id">#29 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-1">Einfach</span>
+            </div>
+            <div class="card-title">Montage-Checklisten</div>
+            <div class="card-desc">Automatische Checklisten für Monteure aus Aufmaß: Material, Werkzeug, Arbeitsschritte, Abnahme-Protokoll</div>
+            <div class="tags">
+                <span class="tag">Checklisten</span>
+                <span class="tag">PDF</span>
+                <span class="tag">Mobile</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#28 Aufmaß</span></div>
+        </div>
+
+        <div class="card" data-phase="3" data-id="30" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#30 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">After Sales Service</div>
+            <div class="card-desc">Proaktive Kundenbetreuung: Wartungsverträge, Cross-Selling, Upgrades basierend auf Produkthistorie</div>
+            <div class="tags">
+                <span class="tag">CRM</span>
+                <span class="tag">Kampagnen</span>
+                <span class="tag">Automatik</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#10 Aufträge, #12 E-Mail, #18 Portal</span></div>
+        </div>
+
+        <!-- NEUE IDEEN #31-#35 -->
+        <div class="card" data-phase="4" data-id="31" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#31 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Rechnungsbuch & Finanzdoku</div>
+            <div class="card-desc">Ein-/Ausgangsrechnungen, Mahnwesen, DATEV-Export, Liquiditätsvorschau, Zahlungsabgleich</div>
+            <div class="tags">
+                <span class="tag">Finanzen</span>
+                <span class="tag">DATEV</span>
+                <span class="tag">OCR</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#12 E-Mail, #32 Projekte, #2 Bilanz</span></div>
+        </div>
+
+        <div class="card" data-phase="2" data-id="32" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#32 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Projekt- & Unterprojekte</div>
+            <div class="card-desc">Hierarchische Projektverwaltung: Hauptprojekt → Unterprojekte → ERP-Dokumente verknüpft</div>
+            <div class="tags">
+                <span class="tag">Projekte</span>
+                <span class="tag">Hierarchie</span>
+                <span class="tag">ERP-Links</span>
+            </div>
+            <div class="dependencies">Verknüpft: <span>#10, #11, #31, #33, #34</span></div>
+        </div>
+
+        <div class="card" data-phase="2" data-id="33" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#33 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Bestellwesen & Lieferanten</div>
+            <div class="card-desc">Bedarfsermittlung → Bestellung → Wareneingang mit Projekt- und Lieferanten-Verknüpfung</div>
+            <div class="tags">
+                <span class="tag">Bestellung</span>
+                <span class="tag">Wareneingang</span>
+                <span class="tag">Lieferanten</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#10 Aufträge, #19 Bewertung, #32 Projekte</span></div>
+        </div>
+
+        <div class="card" data-phase="4" data-id="34" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#34 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Zeiterfassung + GPS</div>
+            <div class="card-desc">Projektzuordnung Pflicht, GPS-Vorschläge bei fehlenden Einträgen, QR-Code, Termin-basiert</div>
+            <div class="tags">
+                <span class="tag">GPS</span>
+                <span class="tag">Projekte</span>
+                <span class="tag">Mobile</span>
+            </div>
+            <div class="dependencies">Erweitert: <span>#15 Zeit, nutzt #11, #32</span></div>
+        </div>
+
+        <div class="card" data-phase="4" data-id="35" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#35 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Urlaubsplaner erweitert</div>
+            <div class="card-desc">Teamkalender, auto. Kapazitätsprüfung, Genehmigungsworkflow, Termin-Konfliktprüfung</div>
+            <div class="tags">
+                <span class="tag">Urlaub</span>
+                <span class="tag">Kapazität</span>
+                <span class="tag">Workflow</span>
+            </div>
+            <div class="dependencies">Erweitert: <span>#16 Urlaub, nutzt #11, #34</span></div>
+        </div>
+
+        <div class="card" data-phase="2" data-id="36" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#36 <span class="new-badge">NEU</span> ⭐</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Beschaffungs-Dashboard</div>
+            <div class="card-desc">Ampel-System: Bestellungen ohne AB, überfällige Lieferungen, Abholware beim Lieferanten - verhindert Montage-Stillstand</div>
+            <div class="tags">
+                <span class="tag">Bestellung</span>
+                <span class="tag">Alerts</span>
+                <span class="tag">SQL</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>dbo.Bestellung, #11 Termine, #14 Dashboard</span></div>
+        </div>
+
+        <!-- #37 WoT-XML Transformer -->
+        <div class="card" data-phase="2" data-id="37" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#37 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">WoT-XML Transformer</div>
+            <div class="card-desc">Weru Konfigurator XML aufbereiten: Redundanz entfernen, Positionstexte kuerzen, Lieferant je Position einfuegen fuer auto. W4A-Zuordnung</div>
+            <div class="tags">
+                <span class="tag">XML</span>
+                <span class="tag">Weru</span>
+                <span class="tag">Import</span>
+            </div>
+            <div class="dependencies">I/O: <span>WoT XML -> transformiert -> W4A Drag&Drop</span></div>
+        </div>
+
+        <!-- #38 Lagerverwaltung & Inventur -->
+        <div class="card" data-phase="2" data-id="38" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#38 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Lagerverwaltung & Inventur</div>
+            <div class="card-desc">Bestandsfuehrung, Inventur-Prozess, Wareneingangsbuchung. Ist-Zustand: Excel + Papier, W4A-Lager ungenutzt. Problem: Teillieferungen falsch gebucht.</div>
+            <div class="tags">
+                <span class="tag">SQL</span>
+                <span class="tag">W4A</span>
+                <span class="tag">Lager</span>
+            </div>
+            <div class="dependencies">Verknuepft: <span>#33 Bestellwesen, #36 Beschaffung</span></div>
+        </div>
+
+        <!-- NEUE IDEEN aus Brainstorming 2025-12-10 -->
+
+        <!-- #39 Tages-Briefing Monteur -->
+        <div class="card" data-phase="2" data-id="39" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#39 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Tages-Briefing Monteur (Montage-Mappe)</div>
+            <div class="card-desc">Auto-Unterlagen + digitale Rueckmeldung: Tablet/Handy statt Papier, Foto-Upload, Spracheingabe (#7)</div>
+            <div class="tags">
+                <span class="tag">Tablet-App</span>
+                <span class="tag">Foto</span>
+                <span class="tag">Sprache</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#7 Sprache, #11 Termine, #40 Kommissionierung</span></div>
+        </div>
+
+        <!-- #40 Material-Kommissionierliste -->
+        <div class="card" data-phase="2" data-id="40" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#40 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Material-Kommissionierliste</div>
+            <div class="card-desc">Auto-generierte Liste: Was muss ins Auto? Aus Auftragspositionen ableiten.</div>
+            <div class="tags">
+                <span class="tag">Listen</span>
+                <span class="tag">Material</span>
+                <span class="tag">Montage</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#10 Auftraege, #38 Lager</span></div>
+        </div>
+
+        <!-- #41 Montage-Status Live -->
+        <div class="card" data-phase="3" data-id="41" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#41 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Montage-Status Live</div>
+            <div class="card-desc">Echtzeit-Status + Auto-SMS an Kunde ("Montage fertig" / "Material wird bestellt")</div>
+            <div class="tags">
+                <span class="tag">Echtzeit</span>
+                <span class="tag">SMS</span>
+                <span class="tag">Kunden-Info</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#11 Termine, #21 App</span></div>
+        </div>
+
+        <!-- #42 Foto-Zuordnung -->
+        <div class="card" data-phase="4" data-id="42" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#42 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Foto-Zuordnung</div>
+            <div class="card-desc">Handy-Foto → Auto-Erkennung Projekt/Kunde → richtige Akte ablegen</div>
+            <div class="tags">
+                <span class="tag">GPS</span>
+                <span class="tag">Fotos</span>
+                <span class="tag">DMS</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#27 Dokument-Intelligenz</span></div>
+        </div>
+
+        <!-- #43 Kanban-Dashboard fuer Ticketsystem -->
+        <div class="card" data-phase="2" data-id="43" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#43</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Kanban-Dashboard Ticketsystem</div>
+            <div class="card-desc">Grafische Kachel-Ansicht fuer W4A-Tickets (Restarbeiten, Montage, Reparaturen). Vorbild: Outlook + Trello</div>
+            <div class="tags">
+                <span class="tag">Dashboard</span>
+                <span class="tag">Visualisierung</span>
+                <span class="tag">W4A</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>W4A Ticketliste, liefert an #14 Command Center</span></div>
+        </div>
+
+        <!-- #44 Kapazitaets-Cockpit -->
+        <div class="card" data-phase="4" data-id="44" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#44 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Kapazitaets-Cockpit</div>
+            <div class="card-desc">Wie voll ist die Woche? Wer hat noch Luft? Ampel-System Auslastung</div>
+            <div class="tags">
+                <span class="tag">Auslastung</span>
+                <span class="tag">Planung</span>
+                <span class="tag">Dashboard</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#11, #15, #35</span></div>
+        </div>
+
+        <!-- #45 MERGED in #23 -->
+        <div class="card" data-phase="3" data-id="45" data-status="merged" data-complexity="0" style="opacity: 0.5; border-left: 4px solid #666;">
+            <div class="card-header">
+                <span class="card-id">#45</span>
+                <span class="tag" style="background: #666;">Merged</span>
+            </div>
+            <div class="card-title" style="text-decoration: line-through;">Angebots-Reminder</div>
+            <div class="card-desc">→ Integriert in #23 Verkaufschancen-Pipeline</div>
+        </div>
+
+        <!-- #46 MERGED in #24 -->
+        <div class="card" data-phase="3" data-id="46" data-status="merged" data-complexity="0" style="opacity: 0.5; border-left: 4px solid #666;">
+            <div class="card-header">
+                <span class="card-id">#46</span>
+                <span class="tag" style="background: #666;">Merged</span>
+            </div>
+            <div class="card-title" style="text-decoration: line-through;">Schnell-Erfassung Anfrage</div>
+            <div class="card-desc">→ Integriert in #24 Ticket-System Integration</div>
+        </div>
+
+        <!-- #47 Kunden-Historie Dashboard + Wiederkauf-Erkennung (inkl. ehem. #48) -->
+        <div class="card" data-phase="3" data-id="47" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#47</span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Kunden-Historie + Wiederkauf</div>
+            <div class="card-desc">Timeline + "Familie Mueller hat 2019 schon Fenster gekauft" erkennen</div>
+            <div class="tags">
+                <span class="tag">Timeline</span>
+                <span class="tag">CRM</span>
+                <span class="tag">Cross-Selling</span>
+                <span class="tag" style="background: #666;">+#48</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#26 Aktivitaeten-Tracking</span></div>
+        </div>
+
+        <!-- #48 MERGED in #47 -->
+        <div class="card" data-phase="4" data-id="48" data-status="merged" data-complexity="0" style="opacity: 0.5; border-left: 4px solid #666;">
+            <div class="card-header">
+                <span class="card-id">#48</span>
+                <span class="tag" style="background: #666;">Merged</span>
+            </div>
+            <div class="card-title" style="text-decoration: line-through;">Wiederkauf-Erkennung</div>
+            <div class="card-desc">→ Integriert in #47 Kunden-Historie Dashboard</div>
+        </div>
+
+        <!-- #49 Google-Reviews Alerts -->
+        <div class="card" data-phase="3" data-id="49" data-status="offen" data-complexity="1">
+            <div class="card-header">
+                <span class="card-id">#49 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-1">Einfach</span>
+            </div>
+            <div class="card-title">Google-Reviews Alerts</div>
+            <div class="card-desc">Neue Bewertung? Sofort Bescheid, schnell reagieren</div>
+            <div class="tags">
+                <span class="tag">Google</span>
+                <span class="tag">Reputation</span>
+                <span class="tag">Alerts</span>
+            </div>
+            <div class="dependencies">Standalone: <span>Google My Business API</span></div>
+        </div>
+
+        <!-- #50 Sanfte Zahlungserinnerung -->
+        <div class="card" data-phase="3" data-id="50" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#50 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Sanfte Zahlungserinnerung</div>
+            <div class="card-desc">Auto-Mail "Rechnung offen" bevor formelle Mahnung</div>
+            <div class="tags">
+                <span class="tag">Finanzen</span>
+                <span class="tag">E-Mail</span>
+                <span class="tag">Automatik</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#31 Rechnungsbuch</span></div>
+        </div>
+
+        <!-- #51 Cashflow-Prognose -->
+        <div class="card" data-phase="4" data-id="51" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#51 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Cashflow-Prognose</div>
+            <div class="card-desc">Wann kommt Geld, wann geht's raus? Liquiditaets-Ampel</div>
+            <div class="tags">
+                <span class="tag">Finanzen</span>
+                <span class="tag">Prognose</span>
+                <span class="tag">Liquiditaet</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#31 Rechnungsbuch, #33 Bestellwesen</span></div>
+        </div>
+
+        <!-- #52 Conversion-Tracker -->
+        <div class="card" data-phase="4" data-id="52" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#52 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Conversion-Tracker</div>
+            <div class="card-desc">Wie viel % der Angebote werden Auftraege? Trend ueber Zeit</div>
+            <div class="tags">
+                <span class="tag">Analytics</span>
+                <span class="tag">Vertrieb</span>
+                <span class="tag">KPIs</span>
+            </div>
+            <div class="dependencies">Liefert an: <span>#14 Dashboard, #23 Pipeline</span></div>
+        </div>
+
+        <!-- #53 Mindestbestand-Alert -->
+        <div class="card" data-phase="2" data-id="53" data-status="offen" data-complexity="2">
+            <div class="card-header">
+                <span class="card-id">#53 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Mindestbestand-Alert</div>
+            <div class="card-desc">Warnung bei kritischem Lagerbestand (Silikon, Dichtungen, etc.)</div>
+            <div class="tags">
+                <span class="tag">Lager</span>
+                <span class="tag">Alerts</span>
+                <span class="tag">Bestellung</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#38 Lager, liefert an #33, #36</span></div>
+        </div>
+
+        <!-- #54 Preis-Vergleich Lieferanten -->
+        <div class="card" data-phase="4" data-id="54" data-status="offen" data-complexity="3">
+            <div class="card-header">
+                <span class="card-id">#54 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">Preis-Vergleich Lieferanten</div>
+            <div class="card-desc">Gleicher Artikel, verschiedene Lieferanten → bester Preis</div>
+            <div class="tags">
+                <span class="tag">Einkauf</span>
+                <span class="tag">Preise</span>
+                <span class="tag">Vergleich</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#1 Preislisten, #19 Bewertung</span></div>
+        </div>
+
+        <!-- #55 Bestellvorlage Pflichtfelder -->
+        <div class="card" data-phase="2" data-id="55" data-status="offen" data-complexity="2" style="border-left: 4px solid gold;">
+            <div class="card-header">
+                <span class="card-id">#55 <span class="new-badge">PRIO</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Bestellvorlage Pflichtfelder</div>
+            <div class="card-desc">Verhindert vergessene KW/Lieferadresse bei Bestellungen</div>
+            <div class="tags">
+                <span class="tag">Bestellung</span>
+                <span class="tag">Validierung</span>
+                <span class="tag">Pflichtfeld</span>
+            </div>
+            <div class="dependencies">Zusammen mit: <span>#56, #57</span></div>
+        </div>
+
+        <!-- #56 AB-Abgleich automatisch -->
+        <div class="card" data-phase="2" data-id="56" data-status="offen" data-complexity="3" style="border-left: 4px solid gold;">
+            <div class="card-header">
+                <span class="card-id">#56 <span class="new-badge">PRIO</span></span>
+                <span class="tag complexity-3">Anspruchsvoll</span>
+            </div>
+            <div class="card-title">AB-Abgleich automatisch</div>
+            <div class="card-desc">Neue AB automatisch mit Bestellung vergleichen, Abweichungen melden</div>
+            <div class="tags">
+                <span class="tag">Bestellung</span>
+                <span class="tag">PDF-Vergleich</span>
+                <span class="tag">AB</span>
+            </div>
+            <div class="dependencies">Zusammen mit: <span>#55, #57</span></div>
+        </div>
+
+        <!-- #57 Lieferadressen-Logik -->
+        <div class="card" data-phase="1" data-id="57" data-status="offen" data-complexity="1" style="border-left: 4px solid gold;">
+            <div class="card-header">
+                <span class="card-id">#57 <span class="new-badge">PRIO 1!</span></span>
+                <span class="tag complexity-1">Einfach</span>
+            </div>
+            <div class="card-title">Lieferadressen-Logik</div>
+            <div class="card-desc">Grosse Teile → Lager, Kleinteile → Buero (automatisch)</div>
+            <div class="tags">
+                <span class="tag">Bestellung</span>
+                <span class="tag">Lieferadresse</span>
+                <span class="tag">Automatik</span>
+            </div>
+            <div class="dependencies">Wichtigste Bestell-Verbesserung!</div>
+        </div>
+
+        <!-- #58 Web-Plattform Grundgeruest -->
+        <div class="card" data-phase="0" data-id="58" data-status="offen" data-complexity="2" style="border-left: 4px solid #ff6b6b; background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);">
+            <div class="card-header">
+                <span class="card-id">#58 <span class="new-badge" style="background: #ff6b6b;">INFRA</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Web-Plattform Grundgeruest</div>
+            <div class="card-desc">Flask + Bootstrap = Basis fuer ALLE Tools (responsive)</div>
+            <div class="tags">
+                <span class="tag">Infrastruktur</span>
+                <span class="tag">Flask</span>
+                <span class="tag">Bootstrap</span>
+            </div>
+            <div class="dependencies">MUSS ZUERST! Voraussetzung fuer alle anderen Tools</div>
+        </div>
+
+        <!-- #59 Datenbank-Connector -->
+        <div class="card" data-phase="0" data-id="59" data-status="offen" data-complexity="2" style="border-left: 4px solid #ff6b6b; background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);">
+            <div class="card-header">
+                <span class="card-id">#59 <span class="new-badge" style="background: #ff6b6b;">INFRA</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Datenbank-Connector</div>
+            <div class="card-desc">Sichere, wiederverwendbare Verbindung zu W4A SQL Server</div>
+            <div class="tags">
+                <span class="tag">Infrastruktur</span>
+                <span class="tag">pyodbc</span>
+                <span class="tag">SQL</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#58</span> | Voraussetzung fuer DB-Tools</div>
+        </div>
+
+        <!-- #60 Auth & Berechtigungen -->
+        <div class="card" data-phase="0" data-id="60" data-status="offen" data-complexity="2" style="border-left: 4px solid #ff6b6b; background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);">
+            <div class="card-header">
+                <span class="card-id">#60 <span class="new-badge" style="background: #ff6b6b;">INFRA</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Auth & Berechtigungen</div>
+            <div class="card-desc">Login-System: Wer darf was sehen? (GF vs Buero vs Monteur)</div>
+            <div class="tags">
+                <span class="tag">Infrastruktur</span>
+                <span class="tag">Login</span>
+                <span class="tag">Rollen</span>
+            </div>
+            <div class="dependencies">Nutzt: <span>#58, #59</span> | Vor sensiblen Modulen</div>
+        </div>
+
+        <!-- #61 MERGED in #28 -->
+        <div class="card" data-phase="2" data-id="61" data-status="merged" data-complexity="0" style="opacity: 0.5; border-left: 4px solid #666;">
+            <div class="card-header">
+                <span class="card-id">#61</span>
+                <span class="tag" style="background: #666;">Merged</span>
+            </div>
+            <div class="card-title" style="text-decoration: line-through;">Mobiles Aufmass-Formular</div>
+            <div class="card-desc">→ Integriert in #28 Digitales Aufmass + Zubehoer</div>
+        </div>
+
+        <!-- #62 Ersatzteil-Erkennung -->
+        <div class="card" data-phase="5" data-id="62" data-status="offen" data-complexity="4" style="border-left: 4px solid var(--phase5);">
+            <div class="card-header">
+                <span class="card-id">#62 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-4">Komplex</span>
+            </div>
+            <div class="card-title">Ersatzteil-Erkennung (KI-Vision)</div>
+            <div class="card-desc">Foto von defektem Teil → KI erkennt → Ersatzteil finden</div>
+            <div class="tags">
+                <span class="tag">KI-Vision</span>
+                <span class="tag">Claude</span>
+                <span class="tag">Reparatur</span>
+            </div>
+            <div class="dependencies">Braucht: <span>#58, #59</span> | Ergaenzt: <span>#9</span> Reparatur</div>
+        </div>
+
+        <!-- #63 Fassaden-Budget -->
+        <div class="card" data-phase="5" data-id="63" data-status="offen" data-complexity="4" style="border-left: 4px solid var(--phase5);">
+            <div class="card-header">
+                <span class="card-id">#63 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-4">Komplex</span>
+            </div>
+            <div class="card-title">Fassaden-Budget (KI-Vision)</div>
+            <div class="card-desc">Hausfoto → KI zaehlt Fenster → grobes Budgetangebot (ca. X-Y€)</div>
+            <div class="tags">
+                <span class="tag">KI-Vision</span>
+                <span class="tag">Akquise</span>
+                <span class="tag">Budget</span>
+            </div>
+            <div class="dependencies">Braucht: <span>#58</span> | Ergaenzt: <span>#6</span> Budget-Generator</div>
+        </div>
+
+        <!-- #64 Data Service Layer (Phase 0) -->
+        <div class="card" data-phase="0" data-id="64" data-status="offen" data-complexity="2" style="border-left: 4px solid #ff6b6b;">
+            <div class="card-header">
+                <span class="card-id">#64 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Data Service Layer</div>
+            <div class="card-desc">Zentrale Datenzugriffs-Schicht: Cache, Events, Services fuer alle Tools</div>
+            <div class="tags">
+                <span class="tag">Infrastruktur</span>
+                <span class="tag">Cache</span>
+                <span class="tag">Python</span>
+            </div>
+            <div class="dependencies">Braucht: <span>#59</span> | Basis fuer: <span>#14</span> Command Center</div>
+        </div>
+
+        <!-- #65 Anzahlungsrechnung-Automatismus (Phase 2) -->
+        <div class="card" data-phase="2" data-id="65" data-status="offen" data-complexity="2" style="border-left: 4px solid #3b82f6;">
+            <div class="card-header">
+                <span class="card-id">#65 <span class="new-badge">NEU</span></span>
+                <span class="tag complexity-2">Mittel</span>
+            </div>
+            <div class="card-title">Anzahlungsrechnung-Automatismus</div>
+            <div class="card-desc">Erinnerung/Pflichtfeld fuer Anzahlung vor Bestellung. Verhindert Cashflow-Probleme.</div>
+            <div class="tags">
+                <span class="tag">Bestellung</span>
+                <span class="tag">Cashflow</span>
+                <span class="tag">Prio</span>
+            </div>
+            <div class="dependencies">Verknuepft: <span>#33</span> Bestellwesen, <span>#55</span> Pflichtfelder</div>
+        </div>
+
+    </div> <!-- Ende cards-grid -->
+
+    </div> <!-- Ende tab-cards -->
+
+    <script>
+        // Aktuelle Filter-Zustände
+        let currentPhase = 'all';
+        let currentStatus = 'all';
+        let currentComplexity = 'all';
+
+        // Farben für Button-Rahmen
+        const colors = {
+            phase: {
+                'all': '#888',
+                '1': '#22c55e',
+                '2': '#3b82f6',
+                '3': '#f59e0b',
+                '4': '#8b5cf6',
+                '5': '#ef4444'
+            },
+            complexity: {
+                'all': '#888',
+                '1': '#22c55e',
+                '2': '#eab308',
+                '3': '#f97316',
+                '4': '#ef4444'
+            },
+            status: {
+                'all': '#888',
+                'offen': '#3b82f6',
+                'fertig': '#22c55e'
+            }
+        };
+
+        // Tab-Switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Dropdown öffnen/schließen
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById(id);
+            const wasOpen = dropdown.classList.contains('open');
+
+            // Alle Dropdowns schließen
+            document.querySelectorAll('.filter-dropdown').forEach(d => {
+                d.classList.remove('open');
+            });
+
+            // Wenn es nicht offen war, öffnen
+            if (!wasOpen) {
+                dropdown.classList.add('open');
+            }
+        }
+
+        // Filter auswählen
+        function selectFilter(type, value, label) {
+            // Wert setzen
+            if (type === 'status') currentStatus = value;
+            if (type === 'phase') currentPhase = value;
+            if (type === 'complexity') currentComplexity = value;
+
+            // Label aktualisieren mit Anzahl
+            const count = getFilteredCount();
+            const labelEl = document.getElementById(type + '-label');
+            labelEl.textContent = label + ' (' + count + ')';
+
+            // Button-Farbe aktualisieren
+            const toggle = document.querySelector('#' + type + '-dropdown .filter-toggle');
+            toggle.style.borderColor = colors[type][value];
+
+            // Selected-Klasse aktualisieren
+            const dropdown = document.getElementById(type + '-dropdown');
+            dropdown.querySelectorAll('.filter-option').forEach(opt => {
+                opt.classList.remove('selected');
+                if (opt.dataset.value === value) {
+                    opt.classList.add('selected');
+                }
+            });
+
+            // Dropdown schließen
+            dropdown.classList.remove('open');
+
+            // Filter anwenden
+            applyFilters();
+
+            // Alle Labels mit aktueller Anzahl aktualisieren
+            updateAllLabels();
+        }
+
+        // Gefilterte Anzahl berechnen
+        function getFilteredCount() {
+            const cards = document.querySelectorAll('.card');
+            let count = 0;
+            cards.forEach(card => {
+                const matchPhase = currentPhase === 'all' || card.dataset.phase === currentPhase;
+                const matchStatus = currentStatus === 'all' || card.dataset.status === currentStatus;
+                const matchComplexity = currentComplexity === 'all' || card.dataset.complexity === currentComplexity;
+                if (matchPhase && matchStatus && matchComplexity) count++;
+            });
+            return count;
+        }
+
+        // Alle Labels aktualisieren
+        function updateAllLabels() {
+            const count = getFilteredCount();
+
+            // Status Label
+            const statusLabel = document.getElementById('status-label');
+            const statusText = currentStatus === 'all' ? 'Alle' : (currentStatus === 'offen' ? 'Offen' : 'Fertig ✓');
+            statusLabel.textContent = statusText + ' (' + count + ')';
+
+            // Phase Label
+            const phaseLabel = document.getElementById('phase-label');
+            const phaseText = currentPhase === 'all' ? 'Alle Phasen' : 'Phase ' + currentPhase;
+            phaseLabel.textContent = phaseText + ' (' + count + ')';
+
+            // Complexity Label
+            const complexityLabel = document.getElementById('complexity-label');
+            const complexityTexts = { 'all': 'Alle Stufen', '1': 'Einfach', '2': 'Mittel', '3': 'Anspruchsvoll', '4': 'Komplex' };
+            complexityLabel.textContent = complexityTexts[currentComplexity] + ' (' + count + ')';
+        }
+
+        // Alle Filter anwenden
+        function applyFilters() {
+            const cards = document.querySelectorAll('.card');
+
+            cards.forEach(card => {
+                const matchPhase = currentPhase === 'all' || card.dataset.phase === currentPhase;
+                const matchStatus = currentStatus === 'all' || card.dataset.status === currentStatus;
+                const matchComplexity = currentComplexity === 'all' || card.dataset.complexity === currentComplexity;
+
+                if (matchPhase && matchStatus && matchComplexity) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        // Klick außerhalb schließt Dropdowns
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.filter-dropdown')) {
+                document.querySelectorAll('.filter-dropdown').forEach(d => {
+                    d.classList.remove('open');
+                });
+            }
+        });
+
+        // Initial Labels setzen
+        updateAllLabels();
+    </script>
+</body>
+</html>

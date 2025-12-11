@@ -1,0 +1,204 @@
+update_interval_days: 7
+sources:
+  # anthropic: DEAKTIVIERT - Kein RSS-Feed mehr verfuegbar (404 seit 2025-12)
+  # Alternative: News via TechCrunch/Verge/AI News abdecken
+  openai:
+    name: OpenAI Blog
+    type: rss
+    url: https://openai.com/blog/rss.xml
+    priority: 1
+  google_ai:
+    name: Google AI Blog
+    type: rss
+    url: https://blog.google/technology/ai/rss/
+    priority: 1
+  huggingface:
+    name: Hugging Face Blog
+    type: rss
+    url: https://huggingface.co/blog/feed.xml
+    priority: 2
+  deepmind:
+    name: Google DeepMind
+    type: rss
+    url: https://deepmind.google/blog/rss.xml
+    priority: 2
+  microsoft_ai:
+    name: Microsoft AI Blog
+    type: rss
+    url: https://blogs.microsoft.com/ai/feed/
+    priority: 2
+  aws_ml:
+    name: AWS Machine Learning
+    type: rss
+    url: https://aws.amazon.com/blogs/machine-learning/feed/
+    priority: 2
+  ai_news:
+    name: AI News
+    type: rss
+    url: https://www.artificialintelligence-news.com/feed/
+    priority: 3
+  venturebeat_ai:
+    name: VentureBeat AI
+    type: rss
+    url: https://venturebeat.com/category/ai/feed/
+    priority: 3
+  techcrunch_ai:
+    name: TechCrunch AI
+    type: rss
+    url: https://techcrunch.com/category/artificial-intelligence/feed/
+    priority: 3
+  the_verge_ai:
+    name: The Verge AI
+    type: rss
+    url: https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
+    priority: 3
+  infoq_ai:
+    name: InfoQ AI/ML
+    type: rss
+    url: https://feed.infoq.com/ai-ml-data-eng/
+    priority: 3
+  ml_mastery:
+    name: Machine Learning Mastery
+    type: rss
+    url: https://machinelearningmastery.com/feed/
+    priority: 4
+  bair_berkeley:
+    name: Berkeley AI Research
+    type: rss
+    url: https://bair.berkeley.edu/blog/feed.xml
+    priority: 4
+  tensorflow:
+    name: TensorFlow Blog
+    type: rss
+    url: https://blog.tensorflow.org/feeds/posts/default
+    priority: 4
+  arxiv_ml:
+    name: arXiv Machine Learning
+    type: rss
+    url: https://rss.arxiv.org/rss/cs.LG
+    priority: 5
+  arxiv_cv:
+    name: arXiv Computer Vision
+    type: rss
+    url: https://rss.arxiv.org/rss/cs.CV
+    priority: 5
+  arxiv_cl:
+    name: arXiv Computation & Language
+    type: rss
+    url: https://rss.arxiv.org/rss/cs.CL
+    priority: 5
+  langchain:
+    name: LangChain Blog
+    type: rss
+    url: https://blog.langchain.com/rss/
+    priority: 3
+    added: '2025-12-09'
+  llamaindex:
+    name: LlamaIndex Blog
+    type: rss
+    url: https://medium.com/feed/llamaindex-blog
+    priority: 3
+    added: '2025-12-09'
+  n8n_blog:
+    name: n8n Blog
+    type: rss
+    url: https://blog.n8n.io/rss
+    priority: 3
+    added: '2025-12-09'
+  # --- AI Coding Tools ---
+  github_blog:
+    name: GitHub Blog (Copilot)
+    type: rss
+    url: https://www.github.blog/feed/
+    priority: 2
+    added: '2025-12-10'
+  windsurf:
+    name: Windsurf (ex-Codeium)
+    type: rss
+    url: https://windsurf.com/feed.xml
+    priority: 2
+    added: '2025-12-10'
+  # --- Bild-KI ---
+  stability_ai:
+    name: Stability AI News
+    type: rss
+    url: https://stability.ai/news?format=rss
+    priority: 3
+    added: '2025-12-10'
+relevant_topics:
+- claude
+- claude code
+- anthropic
+- sonnet
+- opus
+- haiku
+- mcp
+- model context protocol
+- tool use
+- function calling
+- vision
+- ocr
+- pdf
+- document
+- image recognition
+- multimodal
+- automation
+- agent
+- agentic
+- workflow
+- n8n
+- zapier
+- langchain
+- langgraph
+- llamaindex
+- rag
+- retrieval
+- embedding
+- api
+- sdk
+- integration
+- speech
+- whisper
+- transcription
+- voice
+- gpt-4
+- gpt-5
+- gemini
+- llama
+- mistral
+- fine-tune
+- fine-tuning
+- lora
+- qlora
+# AI Coding Tools
+- cursor
+- copilot
+- github copilot
+- windsurf
+- codeium
+- replit
+- bolt
+- v0
+- vercel ai
+# Bild-KI
+- midjourney
+- dall-e
+- dalle
+- stable diffusion
+- flux
+- imagen
+- sd3
+# Audio/Voice
+- elevenlabs
+- eleven labs
+- play.ht
+- voice cloning
+- text to speech
+- tts
+# Automation
+- make.com
+- integromat
+- power automate
+paths:
+  knowledge_db: Z:\IT-Sammlung\KI_Automation\docs\KI_Wissen.md
+  update_log: Z:\IT-Sammlung\KI_Automation\tools\KI_Wissen\update_log.json

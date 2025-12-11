@@ -1,0 +1,28 @@
+# SQL Server Konfiguration
+# ==========================
+
+sql_server:
+  host: "192.168.16.202\\SQLEXPRESS"
+  database: "WorkM001"
+  driver: "SQL Server"
+  timeout: 30
+
+  # Verbindungseinstellungen
+  connection:
+    trusted_connection: false  # Windows Auth (true) oder SQL Auth (false)
+    encrypt: false
+    trust_server_certificate: true
+
+# Offline-Modus
+offline:
+  enabled: true  # Ermöglicht Graceful Degradation
+  cache_queries: true  # Cacht häufige Queries lokal
+  cache_ttl_hours: 24  # Cache-Gültigkeit
+
+# Wichtige Tabellen (für Validierung)
+important_tables:
+  - dbo.Kunden
+  - dbo.Lieferanten
+  - dbo.Artikel
+  - dbo.Projekte
+  - dbo.Auftrag

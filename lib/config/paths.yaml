@@ -1,0 +1,31 @@
+# Zentrale Pfad-Konfiguration
+# ===========================
+
+# Basis-Pfad (wird automatisch erkannt, kann überschrieben werden)
+base_path: "Z:\\IT-Sammlung\\KI_Automation"
+
+# Dokumentation
+docs:
+  sql_wissensdatenbank: "${base_path}\\docs\\SQL_Server_Wissensdatenbank.md"
+  reparatur_analyse: "${base_path}\\docs\\Reparaturprozess_Analyse_und_Automatisierung.md"
+
+# Tools
+tools:
+  ki_wissen: "${base_path}\\tools\\KI_Wissen"
+
+# Shared Library
+lib:
+  config: "${base_path}\\lib\\config"
+  logs: "${base_path}\\lib\\logs"
+
+# Output-Verzeichnisse
+output:
+  logs: "${base_path}\\lib\\logs"
+  backups: "${base_path}\\.claude_md_backups"
+  exports: "${base_path}\\exports"
+
+# Externe Pfade (Firmennetzwerk)
+external:
+  artikellisten: "Z:\\Intern\\Firmensoftware\\Work4all\\Artikellisten"
+  preislisten: "Z:\\Lieferanten"
+  intern: "Z:\\Intern"

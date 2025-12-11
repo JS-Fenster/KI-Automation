@@ -1,0 +1,37 @@
+# Tool-Konfiguration
+# ==================
+
+# Aktivierte Tools
+tools:
+  ki_wissen:
+    enabled: true
+    schedule: "weekly"
+    priority: 1
+
+  preislisten:
+    enabled: false  # Noch nicht implementiert
+    hersteller:
+      - ROKA
+      - Weru
+      - Hörmann
+    priority: 2
+
+  reparatur_portal:
+    enabled: false  # Noch nicht implementiert
+    priority: 3
+
+# Globale Einstellungen
+global:
+  # Logging
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  log_rotation_mb: 10
+  log_retention_count: 5
+
+  # Backups
+  backup_enabled: true
+  backup_count: 10
+
+  # Benachrichtigungen
+  notifications:
+    enabled: false
+    email: ""
