@@ -34,9 +34,16 @@
 | **Anfrageprozess_Analyse.md** | Eingang → Angebot → Nachverfolgung | ✅ IST dokumentiert |
 | **Bestellprozess_Analyse.md** | Auftrag → Bestellung → AB → Wareneingang | ✅ IST dokumentiert |
 | **Reparaturprozess_Analyse.md** | Reparatur-Lifecycle + Automatisierung | ✅ IST + SOLL dokumentiert |
+| **Montageprozess_Analyse.md** | Montage-Workflow | ✅ IST dokumentiert |
+| **Reklamationsprozess_Analyse.md** | Reklamations-Handling | ✅ IST dokumentiert |
+
+### Projekt-Planung (AKTIV!)
+
+| Datei | Inhalt | Status |
+|-------|--------|--------|
+| **Auftragsmanagement_Projektplan.md** | Web-App Architektur, Sync-Strategie, Datenmodell | 🚧 In Planung |
 
 > **Hinweis:** Prozess-Analysen werden halbautomatisch erstellt (User erklaert, Claude dokumentiert).
-> Naechste Prozesse: Montageprozess (noch nicht dokumentiert)
 
 **KI_Wissen.md Schreibregeln:**
 - **Verdichtet & praegnant** - Nur Kern-Infos, keine langen Beschreibungen
