@@ -61,6 +61,20 @@
 | **Node.js** | v24.11.1 | Fuer Web-Tools verfuegbar |
 | **Pfade** | Forward-Slashes `/` | Oder escaped Backslashes `\\` |
 
+## Git & GitHub
+
+| Aspekt | Wert |
+|--------|------|
+| **GitHub Account** | `JS-Fenster` |
+| **E-Mail** | `info@js-fenster.de` |
+| **Auth** | GitHub CLI (`gh auth status`) |
+| **Repo** | `https://github.com/JS-Fenster/Auftragsmanagement.git` |
+
+**CLAUDE: Selbstaendig pushen!**
+- Bei Aenderungen die committet werden sollen: Direkt `git add`, `commit`, `push`
+- Keine Rueckfrage noetig fuer Git-Credentials
+- Falls git config fehlt: `git config user.name "JS-Fenster"` + `git config user.email "info@js-fenster.de"`
+
 ## Wichtige Regeln
 
 1. **Wissensdateien lesen** - Bei Session-Start relevante Dateien einlesen
