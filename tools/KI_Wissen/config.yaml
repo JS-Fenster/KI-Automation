@@ -200,5 +200,6 @@ relevant_topics:
 - integromat
 - power automate
 paths:
-  knowledge_db: Z:\IT-Sammlung\KI_Automation\docs\KI_Wissen.md
-  update_log: Z:\IT-Sammlung\KI_Automation\tools\KI_Wissen\update_log.json
+  # Relative Pfade (vom Script-Ordner aus)
+  knowledge_db: ../../docs/KI_Wissen.md
+  update_log: ./update_log.json

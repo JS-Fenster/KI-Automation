@@ -106,10 +106,10 @@ git config user.email "info@js-fenster.de"
 
 | Repo | Pfad | Inhalt |
 |------|------|--------|
-| **JS-Prozesse** | `Z:/IT-Sammlung/KI_Automation_Hub/JS_Prozesse/` | Ideen, Prozess-Analysen, Planung |
-| **Auftragsmanagement** | `Z:/IT-Sammlung/KI_Automation_Hub/Auftragsmanagement/` | Web-App fuer Auftragsverwaltung |
+| **JS-Prozesse** | `../JS-Prozesse/` | Ideen, Prozess-Analysen, Planung |
+| **Auftragsmanagement** | `../Auftragsmanagement/` | Web-App fuer Auftragsverwaltung |
 
-> **Bei Firma-Projekten:** Auch `JS_Prozesse/CLAUDE.md` einlesen!
+> **Bei Firma-Projekten:** Auch `../JS-Prozesse/CLAUDE.md` einlesen!
 
 ---
 
@@ -160,7 +160,7 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 
 > **Aktualisiert:** 2025-12-11 10:30
 >
-> **IMMER einlesen:** `Z:/IT-Sammlung/KI_Automation_Hub/KI_Automation/docs/KI_Wissen.md`
+> **IMMER einlesen:** `docs/KI_Wissen.md`
 >
 > Enthaelt aktuelle KI/Automation-News und Tools. Wird woechentlich automatisch aktualisiert.
 <!-- KI-WISSEN-END -->
