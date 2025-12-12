@@ -96,6 +96,11 @@ git config user.name "JS-Fenster"
 git config user.email "info@js-fenster.de"
 ```
 
+**Git-Workflow (Fehler vermeiden):**
+1. Vor Push: `git pull --rebase` (verhindert reject)
+2. Grosse Ordner (node_modules): User loescht selbst
+3. Kein `rsync` verfuegbar - `cp -r` nutzen
+
 ---
 
 ## Verwandte Repos
