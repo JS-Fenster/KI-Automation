@@ -142,6 +142,15 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 
 ---
 
+## Multi-Rechner Setup
+
+> **WICHTIG:** Der Hub-Ordner (`KI_Automation_Hub/`) ist KEIN Git-Repo!
+> Alle geteilten Infos muessen in einem der Sub-Repos liegen.
+> `KI_Automation/CLAUDE.md` = Zentrale Basis (wird geshared)
+> Dateien ausserhalb der Git-Repos existieren nur lokal auf dem jeweiligen Rechner.
+
+---
+
 ## Changelog (Struktur-Aenderungen)
 
 > **WICHTIG:** Bei relevanten Aenderungen an der Repo-Struktur hier dokumentieren!
