@@ -132,13 +132,18 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 
 ---
 
-## Self-Check bei neuer Claude-Version
+## Session-Start Checkliste
 
-**Bei Session-Start:**
+**Bei jeder neuen Session:**
+1. Git-Status pruefen (Claude_Start.bat pullt automatisch)
+2. Bei Konflikten/Fehlern: User informieren
+3. Ordner im Hub gegen "Verwandte Repos" pruefen
+4. Unbekanntes Repo gefunden? → User fragen, dann Tabelle + Changelog aktualisieren
+
+**Self-Check (neue Claude-Version):**
 1. Header aus `docs/KI_Wissen.md` lesen
-2. `Claude-Version` mit aktueller vergleichen
-3. Wenn unterschiedlich: "Neue Claude-Version! Self-Check faellig?"
-4. Bekanntes Wissen aus Liste entfernen, Header aktualisieren
+2. `Claude-Version` vergleichen
+3. Wenn unterschiedlich: Bekanntes entfernen, Header aktualisieren
 
 ---
 
