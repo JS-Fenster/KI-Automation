@@ -147,6 +147,26 @@ Dokument.Code ───────────► Positionen.BZObjMemberCode + 
 | RAFF | Raffstore |
 | ISS | Insektenschutz |
 
+### Timestamp-Spalten (fuer Delta-Sync)
+
+**Wichtig:** Diese Spalten ermoeglichen inkrementelle Synchronisation (nur geaenderte Daten uebertragen).
+
+| Spalte | Tabellen | Zweck |
+|--------|----------|-------|
+| **`UpdateTime`** | Angebot, Bestellung, Kunden, Projekte, Rechnung | Letzte Aenderung |
+| **`InsertTime`** | Alle Haupttabellen | Erstellungszeitpunkt |
+| **`LastModificationDate`** | Kunden, Projekte | Alternative zu UpdateTime |
+| **`EditDate`** | Angebot, Bestellung, Rechnung | Bearbeitungsdatum |
+
+**Delta-Sync Query-Beispiel:**
+```sql
+-- Nur Angebote die seit letztem Sync geaendert wurden
+SELECT * FROM Angebot WHERE UpdateTime > @LetzterSync
+
+-- Nur neue Projekte seit letztem Sync
+SELECT * FROM Projekte WHERE InsertTime > @LetzterSync
+```
+
 ---
 
 ## Beispiel-Queries
@@ -274,6 +294,7 @@ conn = pymssql.connect(
 
 | Datum | Aenderung |
 |-------|-----------|
+| 2025-12-12 | **NEU:** Timestamp-Spalten dokumentiert (UpdateTime, InsertTime, etc.) - ermoeglicht Delta-Sync |
 | 2025-12-11 | **KORRIGIERT:** Auftrag = Angebot mit AuftragsDatum, Bestellung→Lieferant via SDObjMemberCode, Kunden-Spalten korrigiert |
 | 2025-12-11 | **GEKUERZT:** Auto-generiertes 18k-Zeilen-Schema entfernt, nur relevante Infos behalten |
 | 2025-12-10 | Verdichtet zu ERP_Datenbank.md, Spalten-Korrekturen |
