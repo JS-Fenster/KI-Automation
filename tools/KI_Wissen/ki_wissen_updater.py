@@ -71,7 +71,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 CONFIG_FILE = SCRIPT_DIR / 'config.yaml'
 UPDATE_LOG_FILE = SCRIPT_DIR / 'update_log.json'
 GAP_ANALYSIS_FILE = SCRIPT_DIR / 'source_gaps.json'
-IDEEN_FILE = Path("Z:/IT-Sammlung/KI_Automation/IDEEN.md")
+IDEEN_FILE = Path("Z:/IT-Sammlung/JS_Prozesse/IDEEN.md")
 
 # =============================================================================
 # HISTORICAL_RELEASES - Wichtige Releases seit Jan 2025 (portabel im Code)

@@ -30,3 +30,8 @@ Thumbs.db
 # Temp
 *.tmp
 *.bak
+
+# Project-specific
+_archive/
+.claude_md_backups/
+lib/config/credentials.yaml
