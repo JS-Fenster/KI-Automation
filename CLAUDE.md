@@ -107,8 +107,8 @@ git config user.email "info@js-fenster.de"
 
 | Repo | Pfad | Inhalt |
 |------|------|--------|
-| **JS-Prozesse** | `Z:/IT-Sammlung/JS_Prozesse/` | Ideen, Prozess-Analysen, Planung |
-| **Auftragsmanagement** | `Z:/IT-Sammlung/Auftragsmanagement/` | Web-App fuer Auftragsverwaltung |
+| **JS-Prozesse** | `Z:/IT-Sammlung/KI_Automation_Hub/JS_Prozesse/` | Ideen, Prozess-Analysen, Planung |
+| **Auftragsmanagement** | `Z:/IT-Sammlung/KI_Automation_Hub/Auftragsmanagement/` | Web-App fuer Auftragsverwaltung |
 
 > **Bei Firma-Projekten:** Auch `JS_Prozesse/CLAUDE.md` einlesen!
 
@@ -150,7 +150,8 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 | Datum | Aenderung | Details |
 |-------|-----------|---------|
 | 2025-12-12 | Repo-Aufteilung | KI_Automation, JS_Prozesse, Auftragsmanagement getrennt |
-| 2025-12-12 | IDEEN verschoben | IDEEN*.* jetzt in `Z:/IT-Sammlung/JS_Prozesse/` |
+| 2025-12-12 | IDEEN verschoben | IDEEN*.* jetzt in `JS_Prozesse/` |
+| 2025-12-12 | Hub-Struktur | Alle Repos jetzt unter `Z:/IT-Sammlung/KI_Automation_Hub/` |
 | 2025-12-12 | Analysen verschoben | `*_Analyse.md` jetzt in `JS_Prozesse/analysen/` |
 | 2025-12-12 | Projektplan verschoben | Nach `Auftragsmanagement/docs/` |
 | 2025-12-12 | ki_wissen_updater.py | IDEEN_FILE Pfad auf JS_Prozesse angepasst |
@@ -160,7 +161,7 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 
 > **Aktualisiert:** 2025-12-11 10:30
 >
-> **IMMER einlesen:** `Z:/IT-Sammlung/KI_Automation/docs/KI_Wissen.md`
+> **IMMER einlesen:** `Z:/IT-Sammlung/KI_Automation_Hub/KI_Automation/docs/KI_Wissen.md`
 >
 > Enthaelt aktuelle KI/Automation-News und Tools. Wird woechentlich automatisch aktualisiert.
 <!-- KI-WISSEN-END -->
