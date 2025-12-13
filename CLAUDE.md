@@ -9,6 +9,8 @@
 
 | Bereich | Anforderung |
 |---------|-------------|
+| **Name** | Andreas Stolarczyk |
+| **Ansprache** | Mit Vornamen (Andreas) |
 | **Sprache** | Deutsch (Konversation), Englisch (Code) |
 | **Code-Standard** | ASCII-only in Code, Variablen/Funktionen auf Englisch, Kommentare auf Englisch |
 | **Keine Umlaute im Code** | ae/oe/ue/ss statt Umlaute in Strings (Logging, Print, etc.) |
@@ -16,6 +18,7 @@
 | **Rueckfragen** | Bei Unklarheiten immer nachfragen |
 | **Dokumentation** | Dateien synchron halten, Redundanzen vermeiden |
 | **Kontext** | Verdichten, kompakt halten - Kontext sparen |
+| **Background Tasks** | Minimal halten, sofort killen wenn fertig |
 
 ---
 
@@ -147,12 +150,39 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 
 ---
 
+## Nach Code-Aenderungen
+
+- Programm starten + Testanleitung liefern
+
+---
+
+## Nach Session-Ende
+
+1. Chat aktiv durchgehen und analysieren
+2. Pruefen: Was wurde gesagt vs. was steht schon in CLAUDE.md?
+3. Falls etwas fehlt → vorschlagen/eintragen
+4. Explizit bestaetigen: "Chat analysiert, [Ergebnis]"
+
+---
+
 ## Multi-Rechner Setup
 
 > **WICHTIG:** Der Hub-Ordner (`KI_Automation_Hub/`) ist KEIN Git-Repo!
 > Alle geteilten Infos muessen in einem der Sub-Repos liegen.
 > `KI_Automation/CLAUDE.md` = Zentrale Basis (wird geshared)
 > Dateien ausserhalb der Git-Repos existieren nur lokal auf dem jeweiligen Rechner.
+
+---
+
+## Rechner-Erkennung
+
+| Computername | Kontext |
+|--------------|---------|
+| LAPTOP_STOLIS1 | Privat |
+<!-- TODO: Arbeitsrechner-Namen eintragen, dann diese Zeile + ??? loeschen -->
+| ??? | Arbeit |
+
+> Bei Session-Start: `hostname` pruefen → Kontext automatisch setzen
 
 ---
 
@@ -168,6 +198,8 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 | 2025-12-12 | Analysen verschoben | `*_Analyse.md` jetzt in `JS_Prozesse/analysen/` |
 | 2025-12-12 | Projektplan verschoben | Nach `Auftragsmanagement/docs/` |
 | 2025-12-12 | ki_wissen_updater.py | IDEEN_FILE Pfad auf JS_Prozesse angepasst |
+| 2025-12-13 | Allgemeine Anforderungen | +Name, +Background Tasks |
+| 2025-12-13 | Session-Regeln | +Nach Code-Aenderungen, +Nach Session-Ende |
 
 <!-- KI-WISSEN-START -->
 ## KI-Wissen (Auto-generiert)
