@@ -13,7 +13,8 @@
 | **Ansprache** | Mit Vornamen (Andreas) |
 | **Sprache** | Deutsch (Konversation), Englisch (Code) |
 | **Code-Standard** | ASCII-only in Code, Variablen/Funktionen auf Englisch, Kommentare auf Englisch |
-| **Keine Umlaute im Code** | ae/oe/ue/ss statt Umlaute in Strings (Logging, Print, etc.) |
+| **Umlaute (ä/ö/ü/ß)** | ✅ In sichtbaren UI-Texten (Labels, Buttons, Dialoge) |
+| | ❌ Im Code (Variablen, Funktionen, Kommentare, Docstrings, Logging) → ae/oe/ue/ss |
 | **Entscheidungen** | Selbststaendig treffen wenn moeglich |
 | **Rueckfragen** | Bei Unklarheiten immer nachfragen |
 | **Dokumentation** | Dateien synchron halten, Redundanzen vermeiden |
@@ -113,6 +114,7 @@ git config user.email "info@js-fenster.de"
 | **Auftragsmanagement** | `../Auftragsmanagement/` | Web-App fuer Auftragsverwaltung |
 
 > **Bei Firma-Projekten:** Auch `../JS-Prozesse/CLAUDE.md` einlesen!
+> **Neue Ideen (Arbeit):** `../JS-Prozesse/IDEEN.md`
 
 ---
 
@@ -204,9 +206,9 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 <!-- KI-WISSEN-START -->
 ## KI-Wissen (Auto-generiert)
 
-> **Aktualisiert:** 2025-12-11 10:30
+> **Aktualisiert:** 2025-12-19 02:02
 >
-> **IMMER einlesen:** `docs/KI_Wissen.md`
+> **IMMER einlesen:** `../../docs/KI_Wissen.md`
 >
-> Enthaelt aktuelle KI/Automation-News und Tools. Wird woechentlich automatisch aktualisiert.
+> Enthält aktuelle KI/Automation-News und Tools. Wird wöchentlich automatisch aktualisiert.
 <!-- KI-WISSEN-END -->

@@ -71,6 +71,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 CONFIG_FILE = SCRIPT_DIR / 'config.yaml'
 UPDATE_LOG_FILE = SCRIPT_DIR / 'update_log.json'
 GAP_ANALYSIS_FILE = SCRIPT_DIR / 'source_gaps.json'
+DISCOVERED_RELEASES_FILE = SCRIPT_DIR / 'discovered_releases.json'
 # Relativ zum Script: tools/KI_Wissen -> tools -> KI-Automation -> Arbeit -> JS-Prozesse
 IDEEN_FILE = SCRIPT_DIR.parent.parent.parent / 'JS-Prozesse' / 'IDEEN.md'
 
@@ -404,11 +405,14 @@ def is_catchup_needed(log: Dict) -> bool:
 
 
 def generate_historical_content() -> str:
-    """Generiert Markdown-Content aus HISTORICAL_RELEASES"""
+    """Generiert Markdown-Content aus HISTORICAL_RELEASES + automatisch entdeckten Releases"""
     content = "## Wichtige Releases 2025\n\n"
-    content += "> Historische Entwicklungen seit Januar 2025 (fest im Code für Portabilität)\n\n"
+    content += "> Historische Entwicklungen seit Januar 2025 (inkl. automatisch entdeckter Releases)\n\n"
 
-    for category, releases in HISTORICAL_RELEASES.items():
+    # Kombiniere statische und dynamische Releases
+    all_releases = get_all_releases()
+
+    for category, releases in all_releases.items():
         content += f"### {category}\n"
         content += "| Datum | Release | Beschreibung | Tags |\n"
         content += "|-------|---------|-------------|------|\n"
@@ -420,6 +424,119 @@ def generate_historical_content() -> str:
         content += "\n"
 
     return content
+
+
+# =============================================================================
+# MODEL RELEASE PATTERNS - Automatische Erkennung neuer Modell-Versionen
+# =============================================================================
+MODEL_RELEASE_PATTERNS = [
+    # OpenAI GPT Modelle
+    (r'\b(GPT[- ]?5\.?\d*(?:-?(?:Instant|Thinking|Pro|Codex|Mini))?)\b', 'OpenAI', 'gpt'),
+    (r'\b(o[34]-?(?:mini|pro)?)\b', 'OpenAI', 'reasoning'),
+    # Anthropic Claude Modelle
+    (r'\b(Claude\s+(?:Opus|Sonnet|Haiku)\s*\d+\.?\d*)\b', 'Anthropic/Claude', 'claude'),
+    # Google Gemini Modelle
+    (r'\b(Gemini\s*\d+\.?\d*\s*(?:Pro|Flash|Ultra)?)\b', 'Google', 'gemini'),
+    # Meta Llama Modelle
+    (r'\b(Llama\s*\d+\.?\d*)\b', 'Andere', 'llama'),
+    # Mistral Modelle
+    (r'\b(Mistral\s+(?:Large|Medium|Small)\s*\d*)\b', 'Andere', 'mistral'),
+]
+
+
+def load_discovered_releases() -> Dict[str, Any]:
+    """Laedt die automatisch entdeckten Releases"""
+    if DISCOVERED_RELEASES_FILE.exists():
+        with open(DISCOVERED_RELEASES_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {"releases": [], "last_scan": None}
+
+
+def save_discovered_releases(data: Dict[str, Any]) -> None:
+    """Speichert die entdeckten Releases"""
+    with open(DISCOVERED_RELEASES_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+def detect_model_releases(entries: List[Dict]) -> List[Dict]:
+    """
+    Erkennt automatisch neue Modell-Releases aus RSS-Feeds.
+    Sucht nach Patterns wie 'GPT-5.2', 'Claude Opus 4.5', 'Gemini 3.0' etc.
+    """
+    # Bestehende Releases laden
+    discovered_data = load_discovered_releases()
+    existing_names = {r['name'].lower() for r in discovered_data.get('releases', [])}
+
+    # Auch HISTORICAL_RELEASES beruecksichtigen
+    for category, releases in HISTORICAL_RELEASES.items():
+        for release in releases:
+            existing_names.add(release[1].lower())
+
+    new_releases = []
+
+    for entry in entries:
+        text = f"{entry['title']} {entry.get('summary', '')}"
+
+        for pattern, category, tag in MODEL_RELEASE_PATTERNS:
+            matches = re.findall(pattern, text, re.IGNORECASE)
+            for match in matches:
+                model_name = match.strip()
+                # Normalisiere den Namen
+                model_name_normalized = re.sub(r'\s+', ' ', model_name).strip()
+
+                if model_name_normalized.lower() not in existing_names:
+                    # Neues Modell gefunden!
+                    release_info = {
+                        'name': model_name_normalized,
+                        'category': category,
+                        'tags': [tag],
+                        'discovered_date': datetime.now().strftime('%Y-%m-%d'),
+                        'source_title': entry['title'][:100],
+                        'source_link': entry.get('link', ''),
+                        'description': f"Automatisch entdeckt aus: {entry['source']}"
+                    }
+                    new_releases.append(release_info)
+                    existing_names.add(model_name_normalized.lower())
+                    logger.info(f"  Neues Modell entdeckt: {model_name_normalized} ({category})")
+
+    # Neue Releases speichern
+    if new_releases:
+        discovered_data['releases'].extend(new_releases)
+        discovered_data['last_scan'] = datetime.now().isoformat()
+        save_discovered_releases(discovered_data)
+        logger.info(f"{len(new_releases)} neue Modell-Releases automatisch entdeckt!")
+
+    return new_releases
+
+
+def get_all_releases() -> Dict[str, List]:
+    """
+    Kombiniert HISTORICAL_RELEASES mit automatisch entdeckten Releases.
+    Gibt ein Dict zurueck das wie HISTORICAL_RELEASES strukturiert ist.
+    """
+    # Kopie von HISTORICAL_RELEASES
+    all_releases = {k: list(v) for k, v in HISTORICAL_RELEASES.items()}
+
+    # Automatisch entdeckte hinzufuegen
+    discovered_data = load_discovered_releases()
+    for release in discovered_data.get('releases', []):
+        category = release.get('category', 'Andere')
+        if category not in all_releases:
+            all_releases[category] = []
+
+        # Format: (date, name, description, tags)
+        entry = (
+            release.get('discovered_date', '2025-12'),
+            release['name'],
+            release.get('description', 'Automatisch entdeckt'),
+            release.get('tags', [])
+        )
+        # Duplikat-Check
+        existing_names = [r[1].lower() for r in all_releases[category]]
+        if release['name'].lower() not in existing_names:
+            all_releases[category].append(entry)
+
+    return all_releases
 
 
 def discover_new_tools(entries: List[Dict]) -> List[Dict]:
@@ -863,6 +980,12 @@ Beispiele:
 
     if not entries:
         logger.warning("Keine relevanten Einträge gefunden")
+
+    # Automatische Modell-Release-Erkennung
+    logger.info("\nScanne nach neuen Modell-Releases...")
+    new_models = detect_model_releases(entries)
+    if new_models:
+        logger.info(f"Neue Modelle gefunden: {[m['name'] for m in new_models]}")
 
     # Gap-Analyse
     logger.info("\nAnalysiere Wissenslücken...")

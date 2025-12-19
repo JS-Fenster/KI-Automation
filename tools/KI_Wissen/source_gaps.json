@@ -1,5 +1,5 @@
 {
-  "analyzed_at": "2025-12-11T10:30:28.794906",
+  "analyzed_at": "2025-12-19T02:02:10.565592",
   "total_topics": 69,
   "low_coverage_topics": [
     {
@@ -19,28 +19,18 @@
     },
     {
       "topic": "haiku",
-      "count": 1,
+      "count": 0,
       "search_suggestion": "haiku RSS feed blog 2025"
     },
     {
-      "topic": "model context protocol",
-      "count": 0,
-      "search_suggestion": "model context protocol RSS feed blog 2025"
-    },
-    {
       "topic": "tool use",
-      "count": 1,
+      "count": 0,
       "search_suggestion": "tool use RSS feed blog 2025"
     },
     {
       "topic": "function calling",
       "count": 0,
       "search_suggestion": "function calling RSS feed blog 2025"
-    },
-    {
-      "topic": "ocr",
-      "count": 0,
-      "search_suggestion": "ocr RSS feed blog 2025"
     },
     {
       "topic": "pdf",
@@ -58,14 +48,9 @@
       "search_suggestion": "zapier RSS feed blog 2025"
     },
     {
-      "topic": "sdk",
+      "topic": "embedding",
       "count": 1,
-      "search_suggestion": "sdk RSS feed blog 2025"
-    },
-    {
-      "topic": "speech",
-      "count": 1,
-      "search_suggestion": "speech RSS feed blog 2025"
+      "search_suggestion": "embedding RSS feed blog 2025"
     },
     {
       "topic": "whisper",
@@ -79,12 +64,12 @@
     },
     {
       "topic": "gpt-4",
-      "count": 0,
+      "count": 1,
       "search_suggestion": "gpt-4 RSS feed blog 2025"
     },
     {
       "topic": "mistral",
-      "count": 0,
+      "count": 1,
       "search_suggestion": "mistral RSS feed blog 2025"
     },
     {
@@ -93,13 +78,8 @@
       "search_suggestion": "fine-tune RSS feed blog 2025"
     },
     {
-      "topic": "fine-tuning",
-      "count": 1,
-      "search_suggestion": "fine-tuning RSS feed blog 2025"
-    },
-    {
       "topic": "lora",
-      "count": 1,
+      "count": 0,
       "search_suggestion": "lora RSS feed blog 2025"
     },
     {
@@ -114,7 +94,7 @@
     },
     {
       "topic": "replit",
-      "count": 1,
+      "count": 0,
       "search_suggestion": "replit RSS feed blog 2025"
     },
     {
@@ -143,8 +123,13 @@
       "search_suggestion": "dalle RSS feed blog 2025"
     },
     {
+      "topic": "flux",
+      "count": 0,
+      "search_suggestion": "flux RSS feed blog 2025"
+    },
+    {
       "topic": "imagen",
-      "count": 1,
+      "count": 0,
       "search_suggestion": "imagen RSS feed blog 2025"
     },
     {
@@ -154,7 +139,7 @@
     },
     {
       "topic": "elevenlabs",
-      "count": 1,
+      "count": 0,
       "search_suggestion": "elevenlabs RSS feed blog 2025"
     },
     {
@@ -198,70 +183,60 @@
       "search_suggestion": "power automate RSS feed blog 2025"
     }
   ],
-  "broken_sources": [
-    "venturebeat_ai"
-  ],
+  "broken_sources": [],
   "well_covered_topics": [
     {
       "topic": "agent",
-      "count": 35
+      "count": 31
     },
     {
       "topic": "rag",
-      "count": 15
-    },
-    {
-      "topic": "workflow",
       "count": 14
     },
     {
-      "topic": "agentic",
+      "topic": "api",
+      "count": 14
+    },
+    {
+      "topic": "workflow",
       "count": 11
     },
     {
-      "topic": "api",
+      "topic": "gemini",
       "count": 10
     },
     {
-      "topic": "integration",
-      "count": 9
+      "topic": "vision",
+      "count": 10
     },
     {
       "topic": "llama",
       "count": 9
     },
     {
-      "topic": "windsurf",
-      "count": 8
+      "topic": "multimodal",
+      "count": 9
     },
     {
       "topic": "n8n",
-      "count": 8
+      "count": 9
     },
     {
-      "topic": "vision",
-      "count": 7
+      "topic": "windsurf",
+      "count": 8
     }
   ],
   "recommendations": [
     {
       "type": "search_new_sources",
-      "message": "39 Topics haben geringe Abdeckung",
+      "message": "36 Topics haben geringe Abdeckung",
       "action": "Claude sollte nach neuen RSS-Feeds für diese Topics suchen",
       "topics": [
         "claude code",
         "sonnet",
         "opus",
         "haiku",
-        "model context protocol"
-      ]
-    },
-    {
-      "type": "fix_broken_sources",
-      "message": "1 Quellen haben Fehler",
-      "action": "URLs prüfen oder alternative Feeds suchen",
-      "sources": [
-        "venturebeat_ai"
+        "tool use"
       ]
     }
   ]

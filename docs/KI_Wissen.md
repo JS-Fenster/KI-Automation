@@ -1,12 +1,12 @@
 # KI & Automation Wissensdatenbank
 
-> Aktualisiert: 2025-12-11 | Naechstes Update: 2025-12-18 | 112 Eintraege
+> Aktualisiert: 2025-12-19 | Naechstes Update: 2025-12-26 | 107 Eintraege
 
 ---
 
 ## Wichtige Releases 2025
 
-> Historische Entwicklungen seit Januar 2025 (fest im Code für Portabilität)
+> Historische Entwicklungen seit Januar 2025 (inkl. automatisch entdeckter Releases)
 
 ### Anthropic/Claude
 | Datum | Release | Beschreibung | Tags |
@@ -28,6 +28,13 @@
 | 2025-06 | **o3-pro** | Premium Reasoning-Variante | `reasoning`, `premium` |
 | 2025-08-07 | **GPT-5** | Naechste Generation Flagship | `flagship` |
 | 2025-12 | **GPT-5.1** | Schnellere, konversationellere Variante | `schnell` |
+| 2025-12-19 | **GPT-5.2-Codex** | Automatisch entdeckt aus: OpenAI Blog | `gpt` |
+| 2025-12-19 | **GPT-5.2** | Automatisch entdeckt aus: OpenAI Blog | `gpt` |
+| 2025-12-19 | **GPT 5.2** | Automatisch entdeckt aus: Windsurf (ex-Codeium) | `gpt` |
+| 2025-12-19 | **GPT 5.1** | Automatisch entdeckt aus: Windsurf (ex-Codeium) | `gpt` |
+| 2025-12-19 | **GPT 5.1-Codex** | Automatisch entdeckt aus: Windsurf (ex-Codeium) | `gpt` |
+| 2025-12-19 | **GPT-5.1-Codex** | Automatisch entdeckt aus: Windsurf (ex-Codeium) | `gpt` |
+| 2025-12-19 | **o3** | Automatisch entdeckt aus: arXiv Computation & Language | `reasoning` |
 
 ### Google
 | Datum | Release | Beschreibung | Tags |
@@ -37,6 +44,10 @@
 | 2025-03-25 | **Gemini 2.5 Pro** | Preview mit extended thinking | `extended-thinking` |
 | 2025-06-17 | **Gemini 2.5 GA** | General Availability |  |
 | 2025-11-18 | **Gemini 3.0 Pro** | Frontier Vision AI | `vision`, `multimodal` |
+| 2025-12-19 | **Gemini 3** | Automatisch entdeckt aus: Google AI Blog | `gemini` |
+| 2025-12-19 | **Gemini 3 Flash** | Automatisch entdeckt aus: Google AI Blog | `gemini` |
+| 2025-12-19 | **Gemini 3 Pro** | Automatisch entdeckt aus: VentureBeat AI | `gemini` |
+| 2025-12-19 | **Gemini 2.5 Flash** | Automatisch entdeckt aus: The Verge AI | `gemini` |
 
 ### AI Coding Tools
 | Datum | Release | Beschreibung | Tags |
@@ -84,16 +95,16 @@
 
 ## Top-News (Highlights)
 
-- **[The 9 best AI workflow automation tools in 2026](https://blog.n8n.io/best-ai-workflow-automation-tools/)** (n8n Blog) `n8n, workflow, zapier, api, automation`
-- **[n8n Expands What’s Possible in Enterprise Automation with Microsoft Agent 365](https://blog.n8n.io/n8n-expands-whats-possible-in-enterprise-automation-with-microsoft-agent-365/)** (n8n Blog) `n8n, agentic, agent, automation, integration`
-- **[Training Multi-Image Vision Agents via End2End Reinforcement Learning](https://arxiv.org/abs/2512.08980)** (arXiv Computer Vision) `agent, rag, imagen, vision, tool use`
-- **[Streamline AI agent tool interactions: Connect API Gateway to AgentCore Gateway with MCP](https://aws.amazon.com/blogs/machine-learning/streamline-ai-agent-tool-interactions-connect-api-gateway-to-agentcore-gateway-with-mcp/)** (AWS Machine Learning) `agentic, agent, mcp, api`
-- **[How CBRE powers unified property management search and digital assistant using Amazon Bedrock](https://aws.amazon.com/blogs/machine-learning/how-cbre-powers-unified-property-management-search-and-digital-assistant-using-amazon-bedrock/)** (AWS Machine Learning) `claude, document, sql, haiku`
-- **[Your stack, your rules: Introducing custom agents in GitHub Copilot for observability, IaC, and security](https://github.blog/news-insights/product-news/your-stack-your-rules-introducing-custom-agents-in-github-copilot-for-observability-iac-and-security/)** (GitHub Blog (Copilot)) `agent, workflow, github copilot, copilot`
-- **[GPT 5.1, GPT 5.1-Codex, and GPT-5.1-Codex Mini are now available in Windsurf](https://windsurf.com/blog/gpt-5-1)** (Windsurf (ex-Codeium)) `agentic, agent, gpt-5, windsurf`
-- **[Introducing LangSmith Fetch: Debug agents from your terminal](https://blog.langchain.com/introducing-langsmith-fetch/)** (LangChain Blog) `cursor, agent, claude, claude code`
-- **[Using skills with Deep Agents](https://blog.langchain.com/using-skills-with-deep-agents/)** (LangChain Blog) `agent, langchain, document, anthropic`
-- **[Querying a network of knowledge with llama-index-networks](https://medium.com/llamaindex-blog/querying-a-network-of-knowledge-with-llama-index-networks-d784b4c3006f?source=rss----d7683ed5043e---4)** (LlamaIndex Blog) `llama, api, rag, llamaindex`
+- **[The 9 best AI workflow automation tools in 2026](https://blog.n8n.io/best-ai-workflow-automation-tools/)** (n8n Blog) `n8n, workflow, automation, api, zapier`
+- **[n8n Expands What’s Possible in Enterprise Automation with Microsoft Agent 365](https://blog.n8n.io/n8n-expands-whats-possible-in-enterprise-automation-with-microsoft-agent-365/)** (n8n Blog) `agentic, n8n, agent, integration, automation`
+- **[Parameter Efficient Multimodal Instruction Tuning for Romanian Vision Language Models](https://arxiv.org/abs/2512.14926)** (arXiv Computation & Language) `vision, rag, ocr, multimodal, fine-tuning`
+- **[Your stack, your rules: Introducing custom agents in GitHub Copilot for observability, IaC, and security](https://github.blog/news-insights/product-news/your-stack-your-rules-introducing-custom-agents-in-github-copilot-for-observability-iac-and-security/)** (GitHub Blog (Copilot)) `agent, copilot, workflow, github copilot`
+- **[GPT 5.2 is now available in Windsurf!](https://windsurf.com/blog/gpt-5-2)** (Windsurf (ex-Codeium)) `gpt-5, agentic, agent, windsurf`
+- **[GPT 5.1, GPT 5.1-Codex, and GPT-5.1-Codex Mini are now available in Windsurf](https://windsurf.com/blog/gpt-5-1)** (Windsurf (ex-Codeium)) `gpt-5, agentic, agent, windsurf`
+- **[Palona goes vertical, launching Vision, Workflow features: 4 key lessons for AI builders](https://venturebeat.com/orchestration/palona-goes-vertical-launching-vision-workflow-features-4-key-lessons-for-ai)** (VentureBeat AI) `vision, agent, workflow, multimodal`
+- **[Google Cloud Launches Managed MCP Support](https://www.infoq.com/news/2025/12/google-cloud-managed-mcp/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=AI%2C+ML+%26+Data+Engineering)** (InfoQ AI/ML) `model context protocol, integration, api, mcp`
+- **[Introducing LangSmith Fetch: Debug agents from your terminal](https://blog.langchain.com/introducing-langsmith-fetch/)** (LangChain Blog) `agent, cursor, claude code, claude`
+- **[Using skills with Deep Agents](https://blog.langchain.com/using-skills-with-deep-agents/)** (LangChain Blog) `document, agent, langchain, anthropic`
 
 ---
 
@@ -109,49 +120,40 @@
 - [n8n Expands What’s Possible in Enterprise Automation with Microsoft Agent 365](https://blog.n8n.io/n8n-expands-whats-possible-in-enterprise-automation-with-microsoft-agent-365/): A new integration with Microsoft Agent 365 lets teams build agentic systems that connect n8n’s AI or...
 - [Build a fast, deep research automation flow with Oxylabs and n8n](https://blog.n8n.io/build-a-fast-deep-research-automation-flow-with-oxylabs-and-n8n/): Learn about web scraping and how to to build an automated web intelligence workflow.
 
-### TechCrunch AI
-- [Google launches managed MCP servers that let AI agents simply plug into its tools](https://techcrunch.com/2025/12/10/google-is-going-all-in-on-mcp-servers-agent-ready-by-design/): Google is rolling out managed MCP servers to make its services “agent-ready by design,” starting wit...
-- [ElevenLabs just hit a $6.6B valuation. Its CEO says the real money isn’t in voice anymore.](https://techcrunch.com/podcast/elevenlabs-just-hit-a-6-6b-valuation-its-ceo-says-the-real-money-isnt-in-voice-anymore/): ElevenLabs has made a name for itself building realistic AI voices.&#160;&#160; What started as two ...
-
 ### The Verge AI
-- [The scramble to launch data centers into space is heating up](https://www.theverge.com/news/841887/data-center-space-solar-power-aetherflux-lunch): A startup developing technologies to harness solar power in space is throwing its hat in with big te...
-- [I couldn&#8217;t fix it with iFixit’s AI FixBot](https://www.theverge.com/ai-artificial-intelligence/841252/ifixit-fixbot-hands-on-ai-chatbot): My classic Sony CRT television won't power on. My living room is chilly because my Mitsubishi heat p...
-- [AI companies want a new internet — and they think they’ve found the key](https://www.theverge.com/ai-artificial-intelligence/841156/ai-companies-aaif-anthropic-mcp-model-context-protocol): Over the past 18 months, the largest AI companies in the world have quietly settled on an approach t...
+- [The ChatGPT app store is here](https://www.theverge.com/news/847067/openai-app-store-directory-sdk-chatgpt): On Wednesday evening, OpenAI launched an App Directory to browse all the tools currently available a...
+- [Democratic lawmakers are investigating data centers’ impact on electricity costs](https://www.theverge.com/news/846696/electricity-cost-ai-data-center-democrat-investigation): Sens. Elizabeth Warren (D-MA), Chris Van Hollen (D-MD), and Richard Blumenthal (D-CT) fired off a le...
+- [Amazon has a new leader for its &#8216;AGI&#8217; group as it plays catch-up on AI](https://www.theverge.com/news/846721/amazon-new-agi-leader-peter-desantis-rohit-prasad): Amazon's head of artificial general intelligence (AGI), Rohit Prasad, is leaving the company next ye...
 
 ### AWS Machine Learning
-- [Streamline AI agent tool interactions: Connect API Gateway to AgentCore Gateway with MCP](https://aws.amazon.com/blogs/machine-learning/streamline-ai-agent-tool-interactions-connect-api-gateway-to-agentcore-gateway-with-mcp/): AgentCore Gateway now supports API Gateway. As organizations explore the possibilities of agentic ap...
-- [How CBRE powers unified property management search and digital assistant using Amazon Bedrock](https://aws.amazon.com/blogs/machine-learning/how-cbre-powers-unified-property-management-search-and-digital-assistant-using-amazon-bedrock/): In this post, CBRE and AWS demonstrate how they transformed property management by building a unifie...
-- [Implement automated smoke testing using Amazon Nova Act headless mode](https://aws.amazon.com/blogs/machine-learning/implement-automated-smoke-testing-using-amazon-nova-act-headless-mode/): This post shows how to implement automated smoke testing using Amazon Nova Act headless mode in CI/C...
+- [Bi-directional streaming for real-time agent interactions now available in Amazon Bedrock AgentCore Runtime](https://aws.amazon.com/blogs/machine-learning/bi-directional-streaming-for-real-time-agent-interactions-now-available-in-amazon-bedrock-agentcore-runtime/): In this post, you will learn about bi-directional streaming on AgentCore Runtime and the prerequisit...
+- [Unlocking video understanding with TwelveLabs Marengo on Amazon Bedrock](https://aws.amazon.com/blogs/machine-learning/unlocking-video-understanding-with-twelvelabs-marengo-on-amazon-bedrock/): In this post, we'll show how the TwelveLabs Marengo embedding model, available on Amazon Bedrock, en...
+- [Customize agent workflows with advanced orchestration techniques using Strands Agents](https://aws.amazon.com/blogs/machine-learning/customize-agent-workflows-with-advanced-orchestration-techniques-using-strands-agents/): In this post, we explore two powerful orchestration patterns implemented with Strands Agents. Using ...
 
 ### OpenAI Blog
-- [OpenAI co-founds Agentic AI Foundation, donates AGENTS.md](https://openai.com/index/agentic-ai-foundation): OpenAI co-founds the Agentic AI Foundation under the Linux Foundation and donates AGENTS.md to suppo...
-- [How Scout24 is building the next generation of real-estate search with AI](https://openai.com/index/scout24): Scout24 has created a GPT-5 powered conversational assistant that reimagines real-estate search, gui...
-- [Bringing powerful AI to millions across Europe with Deutsche Telekom](https://openai.com/index/deutsche-telekom-collaboration): OpenAI is collaborating with Deutsche Telekom to bring advanced, multilingual AI experiences to mill...
+- [Addendum to GPT-5.2 System Card: GPT-5.2-Codex](https://openai.com/index/gpt-5-2-codex-system-card): This system card outlines the comprehensive safety measures implemented for GPT‑5.2-Codex. It detail...
+- [Introducing GPT-5.2-Codex](https://openai.com/index/introducing-gpt-5-2-codex): GPT-5.2-Codex is OpenAI’s most advanced coding model, offering long-horizon reasoning, large-scale c...
+- [Developers can now submit apps to ChatGPT](https://openai.com/index/developers-can-now-submit-apps-to-chatgpt): Developers can now submit apps for review and publication in ChatGPT, with approved apps appearing i...
 
 ### Google AI Blog
-- [Learn more about AI in the workplace in our new research report.](https://blog.google/products/workspace/gemini-ai-workplace-research-report/): A new global survey of executives, decision makers and knowledge workers reveals that organizations ...
-- [2025 at Google](https://blog.google/technology/ai/look-back-2025/): Learn more about Google’s launches, milestones and more from 2025.
-- [New research from Google Workspace reveals how young leaders are using AI at work.](https://blog.google/products/workspace/young-leaders-survey-ai/): Google Workspace has released findings from our second survey that looks at how people aged 22-39 ar...
+- [You can now verify Google AI-generated videos in the Gemini app.](https://blog.google/technology/ai/verify-google-ai-videos-gemini-app/): We’re expanding our content transparency tools to help you more easily identify AI-generated content...
+- [Watch a podcast discussion about Gemini 3 and the future of Search.](https://blog.google/technology/ai/release-notes-podcast-search/): Learn how Gemini 3 powers Google Search with Generative UI, Nano Banana, and interactive graphics.
+- [You can now have more fluid and expressive conversations when you go Live with Search.](https://blog.google/products/search/live-audio-gemini-model-update/): When you go Live with Search, you can have a back-and-forth voice conversation in AI Mode to get rea...
 
 ### Hugging Face Blog
+- [CUGA on Hugging Face: Democratizing Configurable AI Agents](https://huggingface.co/blog/ibm-research/cuga-on-hugging-face)
 - [We Got Claude to Fine-Tune an Open Source LLM](https://huggingface.co/blog/hf-skills-training)
-- [Apriel-1.6-15b-Thinker: Cost-efficient Frontier Multimodal Performance](https://huggingface.co/blog/ServiceNow-AI/apriel-1p6-15b-thinker)
-- [DeepMath: A lightweight math reasoning Agent with smolagents](https://huggingface.co/blog/intel-deepmath)
-
-### AI News
-- [Instacart pilots agentic commerce by embedding in ChatGPT](https://www.artificialintelligence-news.com/news/instacart-pilots-agentic-commerce-by-embedding-in-chatgpt/): Instacart has deployed an embedded checkout experience within ChatGPT through the emerging Agentic C...
-- [Perplexity: AI agents are taking over complex enterprise tasks](https://www.artificialintelligence-news.com/news/perplexity-ai-agents-taking-over-complex-enterprise-tasks/): New adoption data from Perplexity reveals how AI agents are driving workflow efficiency gains by tak...
-- [Accenture and Anthropic partner to boost enterprise AI integration](https://www.artificialintelligence-news.com/news/accenture-anthropic-partner-boost-enterprise-ai-integration/): Accenture and Anthropic are setting out to boost enterprise AI integration with a newly-expanded par...
+- [New in llama.cpp: Model Management](https://huggingface.co/blog/ggml-org/model-management-in-llamacpp)
 
 ### InfoQ AI/ML
-- [Podcast: Platform Engineering for AI: Scaling Agents and MCP at LinkedIn](https://www.infoq.com/podcasts/platform-engineering-scaling-agents/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=AI%2C+ML+%26+Data+Engineering): QCon AI New York Chair Wes Reisz talks with LinkedIn’s Karthik Ramgopal and Prince Valluri about ena...
-- [Agentic Postgres: Postgres for Agentic Apps with Fast Forking and AI-Ready Features](https://www.infoq.com/news/2025/12/agentic-postgres-fast-forking/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=AI%2C+ML+%26+Data+Engineering): Tiger Data, the company behind TimescaleDB, has launched Agentic Postgres, a Postgres-based database...
-- [Replit Introduces New AI Integrations for Multi-Model Development](https://www.infoq.com/news/2025/12/replit-ai-integrations/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=AI%2C+ML+%26+Data+Engineering): Replit has introduced Replit AI Integrations, a feature that lets users select third-party models di...
+- [Google Cloud Launches Managed MCP Support](https://www.infoq.com/news/2025/12/google-cloud-managed-mcp/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=AI%2C+ML+%26+Data+Engineering): Google Cloud's introduction of fully managed Model Context Protocol (MCP) servers revolutionizes its...
+- [Article: NextGen Search - Where AI Meets OpenSearch Through MCP](https://www.infoq.com/articles/nextgen-search-ai-opensearch-mcp/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=AI%2C+ML+%26+Data+Engineering): In this article, authors Srikanth Daggumalli and Arun Lakshmanan discuss next-generation context-awa...
+- [OpenAI at QCon AI NYC: Fine Tuning the Enterprise](https://www.infoq.com/news/2025/12/qcon-openai-rft/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=AI%2C+ML+%26+Data+Engineering): At QCon AI NYC 2025, Will Hang from OpenAI unveiled Agent RFT—a cutting-edge reinforcement fine-tuni...
 
 
 ---
 
-**Wissenslücken:** claude code, sonnet, opus, haiku, model context protocol
+**Wissenslücken:** claude code, sonnet, opus, haiku, tool use
 
 ---
 
@@ -166,4 +168,4 @@
 | **LangChain** | RAG, Agents, Chains |
 | **Whisper** | Speech-to-Text |
 
-*Letztes Update: 2025-12-11*
+*Letztes Update: 2025-12-19*

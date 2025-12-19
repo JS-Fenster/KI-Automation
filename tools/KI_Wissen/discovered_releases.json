@@ -1,0 +1,126 @@
+{
+  "releases": [
+    {
+      "name": "GPT-5.2-Codex",
+      "category": "OpenAI",
+      "tags": [
+        "gpt"
+      ],
+      "discovered_date": "2025-12-19",
+      "source_title": "Introducing GPT-5.2-Codex",
+      "source_link": "https://openai.com/index/introducing-gpt-5-2-codex",
+      "description": "Automatisch entdeckt aus: OpenAI Blog"
+    },
+    {
+      "name": "GPT-5.2",
+      "category": "OpenAI",
+      "tags": [
+        "gpt"
+      ],
+      "discovered_date": "2025-12-19",
+      "source_title": "Addendum to GPT-5.2 System Card: GPT-5.2-Codex",
+      "source_link": "https://openai.com/index/gpt-5-2-codex-system-card",
+      "description": "Automatisch entdeckt aus: OpenAI Blog"
+    },
+    {
+      "name": "Gemini 3",
+      "category": "Google",
+      "tags": [
+        "gemini"
+      ],
+      "discovered_date": "2025-12-19",
+      "source_title": "Watch a podcast discussion about Gemini 3 and the future of Search.",
+      "source_link": "https://blog.google/technology/ai/release-notes-podcast-search/",
+      "description": "Automatisch entdeckt aus: Google AI Blog"
+    },
+    {
+      "name": "Gemini 3 Flash",
+      "category": "Google",
+      "tags": [
+        "gemini"
+      ],
+      "discovered_date": "2025-12-19",
+      "source_title": "Gemini 3 Flash: frontier intelligence built for speed",
+      "source_link": "https://blog.google/products/gemini/gemini-3-flash/",
+      "description": "Automatisch entdeckt aus: Google AI Blog"
+    },
+    {
+      "name": "GPT 5.2",
+      "category": "OpenAI",
+      "tags": [
+        "gpt"
+      ],
+      "discovered_date": "2025-12-19",
+      "source_title": "GPT 5.2 is now available in Windsurf!",
+      "source_link": "https://windsurf.com/blog/gpt-5-2",
+      "description": "Automatisch entdeckt aus: Windsurf (ex-Codeium)"
+    },
+    {
+      "name": "GPT 5.1",
+      "category": "OpenAI",
+      "tags": [
+        "gpt"
+      ],
+      "discovered_date": "2025-12-19",
+      "source_title": "GPT 5.1, GPT 5.1-Codex, and GPT-5.1-Codex Mini are now available in Windsurf",
+      "source_link": "https://windsurf.com/blog/gpt-5-1",
+      "description": "Automatisch entdeckt aus: Windsurf (ex-Codeium)"
+    },
+    {
+      "name": "GPT 5.1-Codex",
+      "category": "OpenAI",
+      "tags": [
+        "gpt"
+      ],
+      "discovered_date": "2025-12-19",
+      "source_title": "GPT 5.1, GPT 5.1-Codex, and GPT-5.1-Codex Mini are now available in Windsurf",
+      "source_link": "https://windsurf.com/blog/gpt-5-1",
+      "description": "Automatisch entdeckt aus: Windsurf (ex-Codeium)"
+    },
+    {
+      "name": "GPT-5.1-Codex",
+      "category": "OpenAI",
+      "tags": [
+        "gpt"
+      ],
+      "discovered_date": "2025-12-19",
+      "source_title": "GPT 5.1, GPT 5.1-Codex, and GPT-5.1-Codex Mini are now available in Windsurf",
+      "source_link": "https://windsurf.com/blog/gpt-5-1",
+      "description": "Automatisch entdeckt aus: Windsurf (ex-Codeium)"
+    },
+    {
+      "name": "Gemini 3 Pro",
+      "category": "Google",
+      "tags": [
+        "gemini"
+      ],
+      "discovered_date": "2025-12-19",
+      "source_title": "Gemini 3 Flash arrives with reduced costs and latency — a powerful combo for enterprises",
+      "source_link": "https://venturebeat.com/technology/gemini-3-flash-arrives-with-reduced-costs-and-latency-a-powerful-combo-for",
+      "description": "Automatisch entdeckt aus: VentureBeat AI"
+    },
+    {
+      "name": "Gemini 2.5 Flash",
+      "category": "Google",
+      "tags": [
+        "gemini"
+      ],
+      "discovered_date": "2025-12-19",
+      "source_title": "Gemini 3 Flash is here, bringing a ‘huge’ upgrade to the Gemini app",
+      "source_link": "https://www.theverge.com/news/845741/gemini-3-flash-google-ai-mode-launch",
+      "description": "Automatisch entdeckt aus: The Verge AI"
+    },
+    {
+      "name": "o3",
+      "category": "OpenAI",
+      "tags": [
+        "reasoning"
+      ],
+      "discovered_date": "2025-12-19",
+      "source_title": "Evaluating Large Language Models on Multimodal Chemistry Olympiad Exams",
+      "source_link": "https://arxiv.org/abs/2512.14989",
+      "description": "Automatisch entdeckt aus: arXiv Computation & Language"
+    }
+  ],
+  "last_scan": "2025-12-19T02:02:10.564699"
+}
