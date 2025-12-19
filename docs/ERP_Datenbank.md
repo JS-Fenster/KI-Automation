@@ -232,6 +232,19 @@ ORDER BY TABLE_NAME
 
 ---
 
+## Dateiablage (Server-Struktur)
+
+| Ordner | Inhalt |
+|--------|--------|
+| `D:\work4all\Work4all\T001` | Ticket-Anhaenge |
+| `D:\work4all\Work4all\Mail001` | Mail-Anhaenge |
+| `D:\work4all\Work4all\Export\Datev\Datev XML online` | Eingangs-/Ausgangsrechnungen (PDF) |
+| `D:\work4all\Work4all\ERPAnhänge\M001` | ERP-Dokumente (Angebote, Bestellungen, etc.) |
+| `D:\work4all\Work4all\CRMAttachements\M001` | CRM-Anhaenge (TODO: genauer pruefen) |
+| `D:\work4all\Work4all\B001` | Sonstige Dokumente (Bilder, Montagescheine, etc.) |
+
+---
+
 ## Remote-Zugriff: Cloudflare Tunnel
 
 **Status:** AKTIV | **Domain:** `js-fenster-intern.org` | **Getestet:** 2025-12-08
