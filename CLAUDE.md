@@ -35,7 +35,8 @@ KI_Automation/
 │   ├── config_loader.py    # Config-Management
 │   └── claude_md_helper.py # CLAUDE.md Sync-Funktionen
 ├── tools/                  # Alle Tool-Projekte
-│   └── KI_Wissen/          # Woechentlicher KI-News Updater
+│   ├── KI_Wissen/          # Woechentlicher KI-News Updater
+│   └── Scanner_Webhook/    # Scanner-Ordner Watcher → n8n Webhook
 ├── docs/                   # Wissensdatenbanken
 │   ├── ERP_Datenbank.md    # SQL Server Schema + Spalten-Korrekturen
 │   └── KI_Wissen.md        # Aktuelle KI/Automation-Tools (auto-updated)
@@ -50,6 +51,7 @@ KI_Automation/
 |-------|--------|--------|
 | `docs/ERP_Datenbank.md` | SQL Server Schema, Spalten-Korrekturen, Tunnel | Manuell bei DB-Erkenntnissen |
 | `docs/KI_Wissen.md` | KI/Automation-News und Tools | Automatisch woechentlich |
+| `docs/Server_Infrastruktur.md` | Hyper-V Host, VMs, Netzwerk | Manuell bei Infrastruktur-Aenderungen |
 
 **KI_Wissen.md Schreibregeln:**
 - Verdichtet & praegnant - Nur Kern-Infos
@@ -60,12 +62,11 @@ KI_Automation/
 
 ## SQL Server Kontext
 
+> **Details:** Siehe `docs/ERP_Datenbank.md`
+
 | Aspekt | Wert |
 |--------|------|
-| **Server** | `192.168.16.202\SQLEXPRESS` |
-| **Datenbank** | `WorkM001` (ERP Work4all) |
 | **Zugriff** | Python (pyodbc) via `lib/db_connector.py` |
-| **Remote** | Via Cloudflare Tunnel erreichbar |
 
 **Regeln:**
 - SELECT immer erlaubt
@@ -181,8 +182,8 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 | Computername | Kontext |
 |--------------|---------|
 | LAPTOP_STOLIS1 | Privat |
-<!-- TODO: Arbeitsrechner-Namen eintragen, dann diese Zeile + ??? loeschen -->
-| ??? | Arbeit |
+| JS-FENSTER | Arbeit |
+| PC003 | Arbeit |
 
 > Bei Session-Start: `hostname` pruefen → Kontext automatisch setzen
 
@@ -202,6 +203,10 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 | 2025-12-12 | ki_wissen_updater.py | IDEEN_FILE Pfad auf JS_Prozesse angepasst |
 | 2025-12-13 | Allgemeine Anforderungen | +Name, +Background Tasks |
 | 2025-12-13 | Session-Regeln | +Nach Code-Aenderungen, +Nach Session-Ende |
+| 2025-12-19 | Server_Infrastruktur.md | Neue Wissensdatenbank fuer Hyper-V, VMs, Netzwerk |
+| 2025-12-19 | Rechner-Erkennung | +JS-FENSTER, +PC003 (Arbeit) |
+| 2025-12-19 | Struktur bereinigt | SQL-Details nach ERP_Datenbank.md verschoben, Dopplungen entfernt |
+| 2025-12-20 | Scanner_Webhook | Von n8n_Installation/ nach tools/ verschoben, n8n_Installation/ geloescht |
 
 <!-- KI-WISSEN-START -->
 ## KI-Wissen (Auto-generiert)
