@@ -211,7 +211,7 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 <!-- KI-WISSEN-START -->
 ## KI-Wissen (Auto-generiert)
 
-> **Aktualisiert:** 2025-12-19 02:02
+> **Aktualisiert:** 2025-12-20 12:21
 >
 > **IMMER einlesen:** `../../docs/KI_Wissen.md`
 >

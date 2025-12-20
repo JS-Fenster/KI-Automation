@@ -1,6 +1,6 @@
 # KI & Automation Wissensdatenbank
 
-> Aktualisiert: 2025-12-19 | Naechstes Update: 2025-12-26 | 107 Eintraege
+> Aktualisiert: 2025-12-20 | Naechstes Update: 2025-12-27 | 95 Eintraege
 
 ---
 
@@ -90,21 +90,22 @@
 | 2025-10 | **Perplexity Comet Browser** | AI-Browser, automatisierbar, API-Alternative | `browser-auto`, `api-alt`, `scraping` |
 | 2025 | **Meta Llama 3.1/3.2** | Open-Source LLMs | `open-source`, `lokal` |
 | 2025 | **Mistral Large 2 / Devstral** | Europaeische LLM-Alternative | `eu`, `open-source` |
+| 2025-12-20 | **Llama 3** | Automatisch entdeckt aus: Machine Learning Mastery | `llama` |
 
 ---
 
 ## Top-News (Highlights)
 
-- **[The 9 best AI workflow automation tools in 2026](https://blog.n8n.io/best-ai-workflow-automation-tools/)** (n8n Blog) `n8n, workflow, automation, api, zapier`
-- **[n8n Expands What’s Possible in Enterprise Automation with Microsoft Agent 365](https://blog.n8n.io/n8n-expands-whats-possible-in-enterprise-automation-with-microsoft-agent-365/)** (n8n Blog) `agentic, n8n, agent, integration, automation`
-- **[Parameter Efficient Multimodal Instruction Tuning for Romanian Vision Language Models](https://arxiv.org/abs/2512.14926)** (arXiv Computation & Language) `vision, rag, ocr, multimodal, fine-tuning`
-- **[Your stack, your rules: Introducing custom agents in GitHub Copilot for observability, IaC, and security](https://github.blog/news-insights/product-news/your-stack-your-rules-introducing-custom-agents-in-github-copilot-for-observability-iac-and-security/)** (GitHub Blog (Copilot)) `agent, copilot, workflow, github copilot`
-- **[GPT 5.2 is now available in Windsurf!](https://windsurf.com/blog/gpt-5-2)** (Windsurf (ex-Codeium)) `gpt-5, agentic, agent, windsurf`
-- **[GPT 5.1, GPT 5.1-Codex, and GPT-5.1-Codex Mini are now available in Windsurf](https://windsurf.com/blog/gpt-5-1)** (Windsurf (ex-Codeium)) `gpt-5, agentic, agent, windsurf`
-- **[Palona goes vertical, launching Vision, Workflow features: 4 key lessons for AI builders](https://venturebeat.com/orchestration/palona-goes-vertical-launching-vision-workflow-features-4-key-lessons-for-ai)** (VentureBeat AI) `vision, agent, workflow, multimodal`
-- **[Google Cloud Launches Managed MCP Support](https://www.infoq.com/news/2025/12/google-cloud-managed-mcp/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=AI%2C+ML+%26+Data+Engineering)** (InfoQ AI/ML) `model context protocol, integration, api, mcp`
-- **[Introducing LangSmith Fetch: Debug agents from your terminal](https://blog.langchain.com/introducing-langsmith-fetch/)** (LangChain Blog) `agent, cursor, claude code, claude`
-- **[Using skills with Deep Agents](https://blog.langchain.com/using-skills-with-deep-agents/)** (LangChain Blog) `document, agent, langchain, anthropic`
+- **[The 9 best AI workflow automation tools in 2026](https://blog.n8n.io/best-ai-workflow-automation-tools/)** (n8n Blog) `n8n, api, workflow, zapier, automation`
+- **[n8n Expands What’s Possible in Enterprise Automation with Microsoft Agent 365](https://blog.n8n.io/n8n-expands-whats-possible-in-enterprise-automation-with-microsoft-agent-365/)** (n8n Blog) `n8n, agent, automation, agentic, integration`
+- **[Your stack, your rules: Introducing custom agents in GitHub Copilot for observability, IaC, and security](https://github.blog/news-insights/product-news/your-stack-your-rules-introducing-custom-agents-in-github-copilot-for-observability-iac-and-security/)** (GitHub Blog (Copilot)) `copilot, agent, workflow, github copilot`
+- **[GPT 5.2 is now available in Windsurf!](https://windsurf.com/blog/gpt-5-2)** (Windsurf (ex-Codeium)) `gpt-5, agent, windsurf, agentic`
+- **[GPT 5.1, GPT 5.1-Codex, and GPT-5.1-Codex Mini are now available in Windsurf](https://windsurf.com/blog/gpt-5-1)** (Windsurf (ex-Codeium)) `gpt-5, agent, windsurf, agentic`
+- **[Google Cloud Launches Managed MCP Support](https://www.infoq.com/news/2025/12/google-cloud-managed-mcp/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=AI%2C+ML+%26+Data+Engineering)** (InfoQ AI/ML) `api, model context protocol, integration, mcp`
+- **[Introducing LangSmith Fetch: Debug agents from your terminal](https://blog.langchain.com/introducing-langsmith-fetch/)** (LangChain Blog) `claude, agent, claude code, cursor`
+- **[Using skills with Deep Agents](https://blog.langchain.com/using-skills-with-deep-agents/)** (LangChain Blog) `anthropic, agent, langchain, document`
+- **[Querying a network of knowledge with llama-index-networks](https://medium.com/llamaindex-blog/querying-a-network-of-knowledge-with-llama-index-networks-d784b4c3006f?source=rss----d7683ed5043e---4)** (LlamaIndex Blog) `llama, llamaindex, api, rag`
+- **[Introducing LlamaCloud and LlamaParse](https://medium.com/llamaindex-blog/introducing-llamacloud-and-llamaparse-af8cedf9006b?source=rss----d7683ed5043e---4)** (LlamaIndex Blog) `llama, llamaindex, rag, retrieval`
 
 ---
 
@@ -120,15 +121,19 @@
 - [n8n Expands What’s Possible in Enterprise Automation with Microsoft Agent 365](https://blog.n8n.io/n8n-expands-whats-possible-in-enterprise-automation-with-microsoft-agent-365/): A new integration with Microsoft Agent 365 lets teams build agentic systems that connect n8n’s AI or...
 - [Build a fast, deep research automation flow with Oxylabs and n8n](https://blog.n8n.io/build-a-fast-deep-research-automation-flow-with-oxylabs-and-n8n/): Learn about web scraping and how to to build an automated web intelligence workflow.
 
+### TechCrunch AI
+- [Cursor continues acquisition spree with Graphite deal](https://techcrunch.com/2025/12/19/cursor-continues-acquisition-spree-with-graphite-deal/): Graphite is an AI code review assistant that was last valued at $290 million.
+- [Known uses voice AI to help you go on more in-person dates](https://techcrunch.com/2025/12/19/known-uses-voice-ai-to-help-you-go-on-more-in-person-dates/): In its test phase in San Francisco, Known said it observed 80% of its introductions led to physical ...
+
 ### The Verge AI
-- [The ChatGPT app store is here](https://www.theverge.com/news/847067/openai-app-store-directory-sdk-chatgpt): On Wednesday evening, OpenAI launched an App Directory to browse all the tools currently available a...
-- [Democratic lawmakers are investigating data centers’ impact on electricity costs](https://www.theverge.com/news/846696/electricity-cost-ai-data-center-democrat-investigation): Sens. Elizabeth Warren (D-MA), Chris Van Hollen (D-MD), and Richard Blumenthal (D-CT) fired off a le...
-- [Amazon has a new leader for its &#8216;AGI&#8217; group as it plays catch-up on AI](https://www.theverge.com/news/846721/amazon-new-agi-leader-peter-desantis-rohit-prasad): Amazon's head of artificial general intelligence (AGI), Rohit Prasad, is leaving the company next ye...
+- [Europol imagines robot crime waves in 2035](https://www.theverge.com/report/847956/robot-crime-wave-europe-police-prediction): Rapid advances in AI and robotics are set to become both powerful tools for police and potent weapon...
+- [OpenAI and Anthropic will start predicting when users are underage](https://www.theverge.com/news/847780/openai-anthropic-teen-safety-chatgpt-claude): OpenAI and Anthropic are rolling out new ways to detect underage users. As OpenAI has updated its gu...
+- [Gemini isn’t replacing Google Assistant on Android just yet](https://www.theverge.com/news/848455/google-assistant-gemini-upgrade-2026): Google isn't quite ready to replace Assistant with Gemini on Android devices. The company said on Fr...
 
 ### AWS Machine Learning
 - [Bi-directional streaming for real-time agent interactions now available in Amazon Bedrock AgentCore Runtime](https://aws.amazon.com/blogs/machine-learning/bi-directional-streaming-for-real-time-agent-interactions-now-available-in-amazon-bedrock-agentcore-runtime/): In this post, you will learn about bi-directional streaming on AgentCore Runtime and the prerequisit...
 - [Unlocking video understanding with TwelveLabs Marengo on Amazon Bedrock](https://aws.amazon.com/blogs/machine-learning/unlocking-video-understanding-with-twelvelabs-marengo-on-amazon-bedrock/): In this post, we'll show how the TwelveLabs Marengo embedding model, available on Amazon Bedrock, en...
-- [Customize agent workflows with advanced orchestration techniques using Strands Agents](https://aws.amazon.com/blogs/machine-learning/customize-agent-workflows-with-advanced-orchestration-techniques-using-strands-agents/): In this post, we explore two powerful orchestration patterns implemented with Strands Agents. Using ...
+- [Build and deploy scalable AI agents with NVIDIA NeMo, Amazon Bedrock AgentCore, and Strands Agents](https://aws.amazon.com/blogs/machine-learning/build-and-deploy-scalable-ai-agents-with-nvidia-nemo-amazon-bedrock-agentcore-and-strands-agents/): This post demonstrates how to use the powerful combination of Strands Agents, Amazon Bedrock AgentCo...
 
 ### OpenAI Blog
 - [Addendum to GPT-5.2 System Card: GPT-5.2-Codex](https://openai.com/index/gpt-5-2-codex-system-card): This system card outlines the comprehensive safety measures implemented for GPT‑5.2-Codex. It detail...
@@ -145,8 +150,13 @@
 - [We Got Claude to Fine-Tune an Open Source LLM](https://huggingface.co/blog/hf-skills-training)
 - [New in llama.cpp: Model Management](https://huggingface.co/blog/ggml-org/model-management-in-llamacpp)
 
+### AI News
+- [Marketing agencies using AI in workflows serve more clients](https://www.artificialintelligence-news.com/news/marketing-agencies-ai-use-creates-faster-workflows-but-need-restructuring-internally/): Of all the many industries, it&#8217;s marketing where AI is no longer an &#8220;innovation lab&#822...
+- [50,000 Copilot licences for Indian service companies](https://www.artificialintelligence-news.com/news/service-provider-ai-implementations-india-enterprise-scale-copilot-rollouts/): Cognizant, Tata Consultancy Services, Infosys, and Wipro have announced plans to deploy more than 20...
+- [Zara’s use of AI shows how retail workflows are quietly changing](https://www.artificialintelligence-news.com/news/zara-use-of-ai-shows-how-retail-workflows-are-quietly-changing/): Zara is testing how far generative AI can be pushed into everyday retail operations, starting with a...
+
 ### InfoQ AI/ML
-- [Google Cloud Launches Managed MCP Support](https://www.infoq.com/news/2025/12/google-cloud-managed-mcp/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=AI%2C+ML+%26+Data+Engineering): Google Cloud's introduction of fully managed Model Context Protocol (MCP) servers revolutionizes its...
+- [Google Cloud Launches Managed MCP Support](https://www.infoq.com/news/2025/12/google-cloud-managed-mcp/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=AI%2C+ML+%26+Data+Engineering): Google Cloud's introduction of fully-managed Model Context Protocol (MCP) servers revolutionizes its...
 - [Article: NextGen Search - Where AI Meets OpenSearch Through MCP](https://www.infoq.com/articles/nextgen-search-ai-opensearch-mcp/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=AI%2C+ML+%26+Data+Engineering): In this article, authors Srikanth Daggumalli and Arun Lakshmanan discuss next-generation context-awa...
 - [OpenAI at QCon AI NYC: Fine Tuning the Enterprise](https://www.infoq.com/news/2025/12/qcon-openai-rft/?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=AI%2C+ML+%26+Data+Engineering): At QCon AI NYC 2025, Will Hang from OpenAI unveiled Agent RFT—a cutting-edge reinforcement fine-tuni...
 
@@ -168,4 +178,4 @@
 | **LangChain** | RAG, Agents, Chains |
 | **Whisper** | Speech-to-Text |
 
-*Letztes Update: 2025-12-19*
+*Letztes Update: 2025-12-20*

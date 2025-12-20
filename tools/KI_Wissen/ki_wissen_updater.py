@@ -73,7 +73,7 @@ UPDATE_LOG_FILE = SCRIPT_DIR / 'update_log.json'
 GAP_ANALYSIS_FILE = SCRIPT_DIR / 'source_gaps.json'
 DISCOVERED_RELEASES_FILE = SCRIPT_DIR / 'discovered_releases.json'
 # Relativ zum Script: tools/KI_Wissen -> tools -> KI-Automation -> Arbeit -> JS-Prozesse
-IDEEN_FILE = SCRIPT_DIR.parent.parent.parent / 'JS-Prozesse' / 'IDEEN.md'
+IDEEN_FILE = SCRIPT_DIR.parent.parent.parent / 'JS_Prozesse' / 'IDEEN.md'
 
 # =============================================================================
 # HISTORICAL_RELEASES - Wichtige Releases seit Jan 2025 (portabel im Code)

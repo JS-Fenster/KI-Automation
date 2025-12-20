@@ -1,5 +1,5 @@
 {
-  "analyzed_at": "2025-12-19T02:02:10.565592",
+  "analyzed_at": "2025-12-20T12:21:38.623859",
   "total_topics": 69,
   "low_coverage_topics": [
     {
@@ -53,6 +53,11 @@
       "search_suggestion": "embedding RSS feed blog 2025"
     },
     {
+      "topic": "speech",
+      "count": 1,
+      "search_suggestion": "speech RSS feed blog 2025"
+    },
+    {
       "topic": "whisper",
       "count": 0,
       "search_suggestion": "whisper RSS feed blog 2025"
@@ -64,18 +69,13 @@
     },
     {
       "topic": "gpt-4",
-      "count": 1,
+      "count": 0,
       "search_suggestion": "gpt-4 RSS feed blog 2025"
     },
     {
       "topic": "mistral",
       "count": 1,
       "search_suggestion": "mistral RSS feed blog 2025"
-    },
-    {
-      "topic": "fine-tune",
-      "count": 1,
-      "search_suggestion": "fine-tune RSS feed blog 2025"
     },
     {
       "topic": "lora",
@@ -183,30 +183,24 @@
       "search_suggestion": "power automate RSS feed blog 2025"
     }
   ],
-  "broken_sources": [],
+  "broken_sources": [
+    "venturebeat_ai"
+  ],
   "well_covered_topics": [
     {
       "topic": "agent",
-      "count": 31
-    },
-    {
-      "topic": "rag",
-      "count": 14
-    },
-    {
-      "topic": "api",
-      "count": 14
+      "count": 30
     },
     {
       "topic": "workflow",
+      "count": 12
+    },
+    {
+      "topic": "api",
       "count": 11
     },
     {
-      "topic": "gemini",
-      "count": 10
-    },
-    {
-      "topic": "vision",
+      "topic": "rag",
       "count": 10
     },
     {
@@ -214,16 +208,24 @@
       "count": 9
     },
     {
-      "topic": "multimodal",
-      "count": 9
-    },
-    {
       "topic": "n8n",
       "count": 9
     },
     {
+      "topic": "gemini",
+      "count": 8
+    },
+    {
       "topic": "windsurf",
       "count": 8
+    },
+    {
+      "topic": "copilot",
+      "count": 7
+    },
+    {
+      "topic": "llamaindex",
+      "count": 7
     }
   ],
   "recommendations": [
@@ -237,6 +239,14 @@
         "opus",
         "haiku",
         "tool use"
+      ]
+    },
+    {
+      "type": "fix_broken_sources",
+      "message": "1 Quellen haben Fehler",
+      "action": "URLs prüfen oder alternative Feeds suchen",
+      "sources": [
+        "venturebeat_ai"
       ]
     }
   ]
