@@ -42,7 +42,7 @@
 | 192.168.16.200 | HYPERV | Hyper-V Host |
 | 192.168.16.202 | AppServer (?) | SQL Server (WorkM001), Port 1433 |
 | 192.168.16.83 | n8n-server | n8n Workflow Automation, Port 5678 |
-| 192.168.16.??? | DC | Domain Controller, Dateiserver |
+| 192.168.16.201 | DC | Domain Controller, Dateiserver |
 
 ---
 
