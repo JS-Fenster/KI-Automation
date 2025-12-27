@@ -3,7 +3,7 @@
 
 $ServiceName = "ScannerWebhookWatcher"
 $ServiceDisplayName = "Scanner Webhook Watcher"
-$ServiceDescription = "Ueberwacht den Scanner-Ordner und sendet neue Dateien an n8n Webhook"
+$ServiceDescription = "Ueberwacht den Scanner-Ordner und sendet neue Dateien an Supabase Edge Function"
 $ScriptPath = "$PSScriptRoot\ScannerWatcher.ps1"
 
 # Pruefe Admin-Rechte
@@ -25,20 +25,39 @@ Write-Host "Option 1: Als geplante Aufgabe einrichten (empfohlen)" -ForegroundCo
 Write-Host "-" * 50
 
 $taskAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$ScriptPath`""
-$taskTrigger = New-ScheduledTaskTrigger -AtStartup
+
+# Trigger 1: Bei Systemstart
+$triggerStartup = New-ScheduledTaskTrigger -AtStartup
+
+# Trigger 2: Alle 5 Minuten (Sicherheitsnetz falls Task abstuerzt)
+$triggerRepeat = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 5)
+
 $taskPrincipal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
-$taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
+
+# Robuste Settings: Unbegrenzte Neustarts, nicht stoppen wenn laeuft
+$taskSettings = New-ScheduledTaskSettingsSet `
+    -AllowStartIfOnBatteries `
+    -DontStopIfGoingOnBatteries `
+    -StartWhenAvailable `
+    -RestartCount 999 `
+    -RestartInterval (New-TimeSpan -Minutes 1) `
+    -MultipleInstances IgnoreNew `
+    -ExecutionTimeLimit (New-TimeSpan -Days 9999)
 
 try {
     # Loesche bestehende Aufgabe falls vorhanden
     Unregister-ScheduledTask -TaskName $ServiceName -Confirm:$false -ErrorAction SilentlyContinue
 
-    # Erstelle neue Aufgabe
-    Register-ScheduledTask -TaskName $ServiceName -Action $taskAction -Trigger $taskTrigger -Principal $taskPrincipal -Settings $taskSettings -Description $ServiceDescription
+    # Erstelle neue Aufgabe mit beiden Triggern
+    Register-ScheduledTask -TaskName $ServiceName -Action $taskAction -Trigger @($triggerStartup, $triggerRepeat) -Principal $taskPrincipal -Settings $taskSettings -Description $ServiceDescription
 
     Write-Host "Geplante Aufgabe '$ServiceName' erfolgreich erstellt!" -ForegroundColor Green
     Write-Host ""
-    Write-Host "Die Aufgabe startet automatisch beim Systemstart." -ForegroundColor Yellow
+    Write-Host "Konfiguration:" -ForegroundColor Yellow
+    Write-Host "  - Startet bei Systemstart" -ForegroundColor White
+    Write-Host "  - Prueft alle 5 Minuten ob noch aktiv" -ForegroundColor White
+    Write-Host "  - Bei Absturz: Unbegrenzte Neustartversuche" -ForegroundColor White
+    Write-Host "  - Mehrfachstart wird ignoriert (IgnoreNew)" -ForegroundColor White
     Write-Host ""
 
     # Aufgabe sofort starten

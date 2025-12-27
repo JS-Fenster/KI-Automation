@@ -5,7 +5,7 @@
 # ============ KONFIGURATION ============
 # WICHTIG: Auf dem Server den lokalen Pfad verwenden (z.B. "D:\Scanner" oder "C:\Scanner")
 $WatchFolder = "D:\Daten\Dokumente\Scanner"
-$WebhookUrl = "https://js-fenster.app.n8n.cloud/webhook/4b49adb1-796b-4818-af75-0ac495f0e389"
+$WebhookUrl = "https://rsmjgdujlpnydbsfuiek.supabase.co/functions/v1/process-document"
 $LogFile = "$PSScriptRoot\scanner_webhook.log"
 $ProcessedFile = "$PSScriptRoot\processed_files.txt"
 # =======================================

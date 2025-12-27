@@ -1,0 +1,342 @@
+{
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3888,
+        576
+      ],
+      "id": "1fb99620-6073-4106-93b0-1f98804a661c",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "cn7mhwSQQGIhfVBM",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3712,
+        576
+      ],
+      "id": "f8fd0da9-0ef4-4d67-98bb-fbe4451c23a8",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "4b49adb1-796b-4818-af75-0ac495f0e389",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        2064,
+        336
+      ],
+      "id": "03a88641-2634-4a0b-a42a-d5b6a0fd503f",
+      "name": "Webhook1",
+      "webhookId": "4b49adb1-796b-4818-af75-0ac495f0e389"
+    },
+    {
+      "parameters": {
+        "binaryProperty": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mistralAi",
+      "typeVersion": 1,
+      "position": [
+        2352,
+        336
+      ],
+      "id": "ae2ccc40-d906-410b-8970-aa9992a5987b",
+      "name": "Extract text1",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "vML0dBla8zbw4Ewm",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Eingegangenes Dokument:\n\n {{ $json.extractedText }}",
+        "options": {
+          "systemMessage": "Du bist ein Extrahierungs- und Benennungsassistent für eingehende Dokumente der Firma J.S. Fenster Türen. \n\nDu vergibst für jedes Dokument eine Kategorie.\n- Preisanfrage\n- Angebot\n- Auftragsbestätigung\n- Bestellung\n- Eingangslieferschein \n- Eingangsrechnung\n- Kundenlieferschein \n- Montageauftrag\n- Ausgangsrechnung\n- Zahlungserinnerung\n- Mahnung\n- Notiz \n- Skizze\n- Brief_an_Kunde\n- Brief_von_Kunde\n- Brief_von_Finanzamt\n- Brief_von_Amt (alle anderen Ämter)\n- Sonstiges_Dokument\n\nDu antwortest Nur mit der Kategorie und gibst nichts anderes zurück. \n\nBeispiel einer Antwort:\n\n\"\"\"\nBrief_von_Kunde\n\"\"\"\n\nNegativbeispiel:\n\n\"\"\"\nKategorie: Brief_von_Kunde\n\"\"\"\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2560,
+        336
+      ],
+      "id": "8aeecedb-9acf-48d6-ad04-a1d368c462cb",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.2",
+          "mode": "list",
+          "cachedResultName": "gpt-5.2"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2560,
+        624
+      ],
+      "id": "afb36642-0a04-4c86-beb9-475e264ad02b",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "38JzdD7z1k5DGzY6",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2976,
+        576
+      ],
+      "id": "4119ca4d-8342-4d96-b081-e16f910a75b2",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extrahiere strukturierte Daten aus dem folgenden Dokument.\n\n**Dokumentenkategorie:** {{ $('Merge1').item.json.output }}\n\n**Dokument-URL:** {{ $('Supabase:Datei in Bucket speichern').item.json.Key }}\n\n**OCR-extrahierter Text:**\n{{ $('Extract text1').item.json.extractedText }}\n\n---\n\nAnalysiere den Text sorgfältig und extrahiere alle relevanten Informationen gemäß den Extraktionsregeln für die Kategorie \"{{ $('Merge1').item.json.output }}\".\n\nAntworte ausschließlich mit dem JSON-Objekt. Keine Erklärungen, keine Markdown-Formatierung.",
+        "options": {
+          "systemMessage": "=Du bist ein hochpräziser Dokumentenextraktions-Assistent für die Firma J.S. Fenster Türen. Deine Aufgabe ist es, strukturierte Daten aus bereits per OCR extrahierten Dokumententexten zu gewinnen.\n\nDu erhältst:\n1. Die Dokumentenkategorie (vom vorherigen Agenten klassifiziert)\n2. Den OCR-extrahierten Text des Dokuments\n3. Die URL des gespeicherten Dokuments\n\nDeine Ausgabe ist IMMER ein valides JSON-Objekt. Niemals Markdown-Codeblöcke, niemals Erklärungen - nur das reine JSON.\n\n---\n\n## EXTRAKTIONSREGELN PRO KATEGORIE\n\n### Preisanfrage\nExtrahiere:\n- anfrage_datum: Datum der Anfrage (ISO 8601: YYYY-MM-DD)\n- anfrage_nummer: Referenz-/Anfragenummer falls vorhanden\n- anfragender: {\n    firma: Firmenname,\n    ansprechpartner: Name der Person,\n    adresse: {strasse, plz, ort, land},\n    telefon: Telefonnummer,\n    email: E-Mail-Adresse,\n    kundennummer: falls bekannt\n  }\n- angefragte_produkte: [{\n    position: Positionsnummer,\n    beschreibung: Produktbeschreibung,\n    menge: Anzahl,\n    einheit: Stück/m²/lfm etc.,\n    masse: {breite, hoehe, tiefe} falls angegeben,\n    material: Materialangabe,\n    farbe: Farbwunsch,\n    zusatzoptionen: [Liste von Sonderausstattungen]\n  }]\n- gewuenschter_liefertermin: Datum oder Zeitraum\n- lieferadresse: falls abweichend von Anfrageradresse\n- bemerkungen: Sonstige Anmerkungen\n- dringlichkeit: hoch/mittel/niedrig (aus Kontext ableiten)\n\n### Angebot\nExtrahiere:\n- angebot_nummer: Angebotsnummer\n- angebot_datum: Ausstellungsdatum (YYYY-MM-DD)\n- gueltig_bis: Gültigkeitsdatum (YYYY-MM-DD)\n- aussteller: {\n    firma: J.S. Fenster Türen oder Lieferantenname,\n    ansprechpartner: Sachbearbeiter,\n    telefon: Durchwahl,\n    email: E-Mail,\n    ust_id: USt-IdNr.\n  }\n- empfaenger: {\n    firma: Firmenname falls B2B,\n    name: Kundenname,\n    ansprechpartner: Ansprechpartner,\n    adresse: {strasse, plz, ort, land},\n    kundennummer: Kundennummer\n  }\n- referenz: Bezug auf Anfrage/Projekt\n- positionen: [{\n    pos_nr: Positionsnummer,\n    artikel_nr: Artikelnummer,\n    beschreibung: Detaillierte Beschreibung,\n    menge: Anzahl,\n    einheit: Einheit,\n    einzelpreis_netto: Preis pro Einheit,\n    rabatt_prozent: Rabatt in %,\n    gesamtpreis_netto: Positionsgesamtpreis,\n    masse: {breite, hoehe, tiefe},\n    material: Material,\n    farbe_aussen: Außenfarbe/RAL,\n    farbe_innen: Innenfarbe/RAL,\n    verglasung: Verglasungsart,\n    uw_wert: U-Wert Fenster,\n    ug_wert: U-Wert Glas,\n    schallschutz: Schallschutzklasse,\n    beschlaege: Beschlagsart,\n    oeffnungsart: Dreh/Kipp/Dreh-Kipp etc.,\n    zusatzausstattung: [Rollläden, Insektenschutz, etc.]\n  }]\n- summe_netto: Nettosumme aller Positionen\n- rabatt_gesamt: Gesamtrabatt falls vorhanden\n- zwischensumme_netto: Nach Rabatt\n- versandkosten_netto: Versand/Lieferkosten\n- montagekosten_netto: Montagekosten falls enthalten\n- summe_netto_gesamt: Gesamtsumme netto\n- mwst_satz: MwSt-Satz in %\n- mwst_betrag: MwSt-Betrag\n- summe_brutto: Gesamtsumme brutto\n- zahlungsbedingungen: {\n    zahlungsziel_tage: Zahlungsziel in Tagen,\n    skonto_prozent: Skonto in %,\n    skonto_tage: Skontofrist in Tagen,\n    zahlungsart: Überweisung/Bar/etc.\n  }\n- bankverbindung: {\n    bank: Bankname,\n    iban: IBAN,\n    bic: BIC,\n    kontoinhaber: Name\n  }\n- lieferbedingungen: {\n    lieferzeit_wochen: Lieferzeit in Wochen,\n    lieferart: frei Haus/ab Werk/etc.,\n    incoterms: falls angegeben\n  }\n- montage_enthalten: true/false\n- bemerkungen: Sonstige Hinweise\n- agb_verweis: Verweis auf AGB\n\n### Auftragsbestätigung\nExtrahiere:\n- ab_nummer: Auftragsbestätigungsnummer\n- ab_datum: Datum der AB (YYYY-MM-DD)\n- bezug_angebot: Angebotsnummer auf die sich bezogen wird\n- bezug_bestellung: Bestellnummer des Kunden\n- aussteller: {\n    firma: Firmenname,\n    ansprechpartner: Sachbearbeiter,\n    telefon: Telefon,\n    email: E-Mail\n  }\n- kunde: {\n    firma: Firmenname,\n    name: Kundenname,\n    kundennummer: Kundennummer,\n    ansprechpartner: Ansprechpartner,\n    adresse: {strasse, plz, ort, land}\n  }\n- positionen: [{\n    pos_nr: Positionsnummer,\n    artikel_nr: Artikelnummer,\n    beschreibung: Beschreibung,\n    menge: Menge,\n    einheit: Einheit,\n    einzelpreis_netto: Einzelpreis,\n    gesamtpreis_netto: Gesamtpreis,\n    liefertermin: geplanter Liefertermin dieser Position\n  }]\n- summe_netto: Nettosumme\n- mwst_betrag: MwSt\n- summe_brutto: Bruttosumme\n- liefertermin_verbindlich: Verbindlicher Liefertermin (YYYY-MM-DD)\n- lieferadresse: {strasse, plz, ort, land} falls abweichend\n- zahlungsbedingungen: Zahlungskonditionen\n- anzahlung: {\n    betrag: Anzahlungsbetrag,\n    faellig_am: Fälligkeitsdatum,\n    bezahlt: true/false falls erkennbar\n  }\n- aenderungen_zum_angebot: [Liste von Änderungen gegenüber dem Angebot]\n- bemerkungen: Sonstige Hinweise\n\n### Bestellung\nExtrahiere:\n- bestell_nummer: Bestellnummer\n- bestell_datum: Bestelldatum (YYYY-MM-DD)\n- bezug_angebot: Angebotsnummer falls vorhanden\n- besteller: {\n    firma: J.S. Fenster Türen,\n    ansprechpartner: Besteller,\n    telefon: Telefon,\n    email: E-Mail,\n    kundennummer_beim_lieferanten: unsere Kundennummer\n  }\n- lieferant: {\n    firma: Lieferantenname,\n    ansprechpartner: Ansprechpartner,\n    adresse: {strasse, plz, ort, land},\n    lieferantennummer: unsere interne Lieferantennummer\n  }\n- positionen: [{\n    pos_nr: Positionsnummer,\n    artikel_nr: Artikelnummer Lieferant,\n    artikel_nr_intern: unsere Artikelnummer,\n    beschreibung: Beschreibung,\n    menge: Menge,\n    einheit: Einheit,\n    einzelpreis_netto: Einzelpreis,\n    gesamtpreis_netto: Gesamtpreis,\n    fuer_kunde: Kundenname/Projekt falls zuordenbar\n  }]\n- summe_netto: Nettosumme\n- mwst_betrag: MwSt\n- summe_brutto: Bruttosumme\n- gewuenschter_liefertermin: Wunschliefertermin (YYYY-MM-DD)\n- lieferadresse: {\n    firma: Lieferadresse Firma,\n    strasse: Straße,\n    plz: PLZ,\n    ort: Ort,\n    land: Land,\n    ansprechpartner: Ansprechpartner vor Ort,\n    telefon: Telefon für Lieferung\n  }\n- versandart: Spedition/Paket/Selbstabholung\n- zahlungsbedingungen: vereinbarte Konditionen\n- projekt_referenz: Projektnummer/-name\n- bemerkungen: Besondere Hinweise an Lieferant\n\n### Eingangslieferschein\nExtrahiere:\n- lieferschein_nummer: Lieferscheinnummer des Lieferanten\n- lieferschein_datum: Datum des Lieferscheins (YYYY-MM-DD)\n- lieferant: {\n    firma: Lieferantenname,\n    adresse: {strasse, plz, ort, land},\n    lieferantennummer: unsere interne Nummer\n  }\n- bezug_bestellung: unsere Bestellnummer\n- bezug_ab_lieferant: AB-Nummer des Lieferanten\n- empfaenger: {\n    firma: J.S. Fenster Türen,\n    adresse: {strasse, plz, ort},\n    angenommen_von: Name des Annehmenden falls erkennbar\n  }\n- lieferdatum: Tatsächliches Lieferdatum (YYYY-MM-DD)\n- positionen: [{\n    pos_nr: Position,\n    artikel_nr: Artikelnummer,\n    beschreibung: Beschreibung,\n    menge_geliefert: Gelieferte Menge,\n    menge_bestellt: Bestellte Menge falls angegeben,\n    einheit: Einheit,\n    charge_nr: Chargennummer,\n    seriennummern: [Liste von Seriennummern],\n    gewicht_kg: Gewicht falls angegeben,\n    bemerkung: Positionsbemerkung\n  }]\n- anzahl_packstücke: Anzahl Pakete/Paletten\n- gesamtgewicht_kg: Gesamtgewicht\n- versandart: Spedition/Paket/etc.\n- spediteur: Name des Spediteurs\n- frachtbrief_nr: Frachtbriefnummer\n- zustand_bei_annahme: einwandfrei/beschädigt\n- schaeden_dokumentiert: Beschreibung von Schäden falls vorhanden\n- unterschrift_empfaenger: Name falls lesbar\n- bemerkungen: Sonstige Anmerkungen\n\n### Eingangsrechnung\nExtrahiere:\n- rechnung_nummer: Rechnungsnummer des Lieferanten\n- rechnung_datum: Rechnungsdatum (YYYY-MM-DD)\n- leistungsdatum: Liefer-/Leistungsdatum (YYYY-MM-DD)\n- leistungszeitraum: {von: YYYY-MM-DD, bis: YYYY-MM-DD} falls Zeitraum\n- lieferant: {\n    firma: Lieferantenname,\n    adresse: {strasse, plz, ort, land},\n    ust_id: USt-IdNr.,\n    steuernummer: Steuernummer,\n    lieferantennummer: unsere interne Nummer\n  }\n- empfaenger: {\n    firma: J.S. Fenster Türen,\n    adresse: {strasse, plz, ort},\n    kundennummer: unsere Kundennummer beim Lieferanten\n  }\n- bezug_dokumente: {\n    bestellung: unsere Bestellnummer,\n    lieferschein: Lieferscheinnummer,\n    ab: Auftragsbestätigung\n  }\n- positionen: [{\n    pos_nr: Position,\n    artikel_nr: Artikelnummer,\n    beschreibung: Beschreibung,\n    menge: Menge,\n    einheit: Einheit,\n    einzelpreis_netto: Einzelpreis,\n    rabatt_prozent: Rabatt,\n    gesamtpreis_netto: Positionspreis netto\n  }]\n- summe_netto: Nettosumme\n- rabatt_gesamt: Gesamtrabatt falls vorhanden\n- versandkosten_netto: Versandkosten\n- verpackungskosten_netto: Verpackungskosten\n- mwst_positionen: [{\n    satz: MwSt-Satz in %,\n    netto_basis: Bemessungsgrundlage,\n    mwst_betrag: MwSt-Betrag\n  }]\n- mwst_gesamt: Gesamte MwSt\n- summe_brutto: Bruttosumme (Zahlbetrag)\n- bereits_gezahlt: Anzahlungen falls vorhanden\n- offener_betrag: Noch zu zahlender Betrag\n- zahlungsbedingungen: {\n    zahlungsziel_tage: Tage,\n    faellig_am: Fälligkeitsdatum (YYYY-MM-DD),\n    skonto_prozent: Skonto %,\n    skonto_tage: Skontofrist,\n    skonto_betrag: Skontobetrag\n  }\n- bankverbindung: {\n    bank: Bankname,\n    iban: IBAN,\n    bic: BIC,\n    kontoinhaber: Kontoinhaber,\n    verwendungszweck: Verwendungszweck\n  }\n- reverse_charge: true/false (bei innergemeinschaftlichem Erwerb)\n- kleinunternehmer: true/false (§19 UStG)\n- bemerkungen: Sonstige Hinweise\n- vorsteuerabzug_relevant: true/false (ableiten aus Kontext)\n\n### Kundenlieferschein\nExtrahiere:\n- lieferschein_nummer: unsere Lieferscheinnummer\n- lieferschein_datum: Datum (YYYY-MM-DD)\n- aussteller: {\n    firma: J.S. Fenster Türen,\n    adresse: {strasse, plz, ort},\n    telefon: Telefon,\n    email: E-Mail\n  }\n- kunde: {\n    firma: Kundenname,\n    name: Name,\n    kundennummer: Kundennummer,\n    adresse: {strasse, plz, ort, land}\n  }\n- lieferadresse: {\n    firma: falls abweichend,\n    name: Empfängername,\n    strasse: Straße,\n    plz: PLZ,\n    ort: Ort,\n    land: Land,\n    ansprechpartner: Ansprechpartner,\n    telefon: Telefon\n  }\n- bezug_dokumente: {\n    auftrag: Auftragsnummer,\n    angebot: Angebotsnummer,\n    bestellung_kunde: Bestellnummer des Kunden\n  }\n- positionen: [{\n    pos_nr: Position,\n    artikel_nr: Artikelnummer,\n    beschreibung: Beschreibung,\n    menge: Menge,\n    einheit: Einheit,\n    gewicht_kg: Gewicht,\n    bemerkung: Positionsbemerkung\n  }]\n- anzahl_packstücke: Anzahl Pakete/Paletten\n- gesamtgewicht_kg: Gesamtgewicht\n- versandart: Lieferart\n- spediteur: Spediteursname\n- montage_erforderlich: true/false\n- montagetermin: falls bekannt (YYYY-MM-DD)\n- bemerkungen: Hinweise\n- unterschrift_feld: true/false (Unterschriftsfeld vorhanden)\n\n### Montageauftrag\nExtrahiere:\n- montageauftrag_nummer: Auftragsnummer\n- erstellungsdatum: Datum der Erstellung (YYYY-MM-DD)\n- bezug_dokumente: {\n    auftrag: Hauptauftragsnummer,\n    lieferschein: Lieferscheinnummer,\n    angebot: Angebotsnummer\n  }\n- kunde: {\n    firma: Kundenname,\n    name: Name,\n    kundennummer: Kundennummer,\n    ansprechpartner: Ansprechpartner vor Ort,\n    telefon: Telefon,\n    mobil: Mobilnummer,\n    email: E-Mail\n  }\n- montageadresse: {\n    strasse: Straße,\n    plz: PLZ,\n    ort: Ort,\n    etage: Etage/Stockwerk,\n    aufzug_vorhanden: true/false,\n    parkmoeglichkeit: Hinweise zum Parken,\n    zugang: Zugangsinformationen\n  }\n- montagetermin: {\n    datum: Datum (YYYY-MM-DD),\n    uhrzeit_von: Startzeit,\n    uhrzeit_bis: Endzeit,\n    geschaetzte_dauer_stunden: Geschätzte Dauer\n  }\n- monteure: [{\n    name: Monteurname,\n    telefon: Telefonnummer\n  }]\n- zu_montierende_elemente: [{\n    pos_nr: Position,\n    artikel_nr: Artikelnummer,\n    beschreibung: Beschreibung (z.B. \"Fenster 2-flg. Dreh-Kipp\"),\n    menge: Anzahl,\n    masse: {breite, hoehe},\n    einbauort: Raum/Lage im Gebäude,\n    demontage_alt: true/false (Altfenster demontieren),\n    besonderheiten: spezielle Hinweise\n  }]\n- material_mitzunehmen: [{\n    bezeichnung: Materialbezeichnung,\n    menge: Menge,\n    einheit: Einheit\n  }]\n- werkzeug_spezial: [Liste von benötigtem Spezialwerkzeug]\n- arbeitsanweisungen: [Liste von speziellen Anweisungen]\n- demontage_entsorgung: {\n    altfenster_entsorgen: true/false,\n    kunde_entsorgt: true/false,\n    entsorgungsort: falls bekannt\n  }\n- sicherheitshinweise: [relevante Sicherheitshinweise]\n- nacharbeiten_erforderlich: {\n    innenlaibung: true/false,\n    aussenlaibung: true/false,\n    sonstiges: Beschreibung\n  }\n- abnahme: {\n    protokoll_erforderlich: true/false,\n    fotos_erforderlich: true/false\n  }\n- bemerkungen: Sonstige Hinweise\n- kundenwuensche: Spezielle Kundenwünsche\n\n### Ausgangsrechnung\nExtrahiere:\n- rechnung_nummer: unsere Rechnungsnummer\n- rechnung_datum: Rechnungsdatum (YYYY-MM-DD)\n- leistungsdatum: Liefer-/Leistungsdatum (YYYY-MM-DD)\n- leistungszeitraum: {von: YYYY-MM-DD, bis: YYYY-MM-DD}\n- aussteller: {\n    firma: J.S. Fenster Türen,\n    adresse: {strasse, plz, ort},\n    telefon: Telefon,\n    email: E-Mail,\n    ust_id: USt-IdNr.,\n    steuernummer: Steuernummer,\n    handelsregister: HR-Eintrag\n  }\n- kunde: {\n    firma: Kundenname,\n    name: Name,\n    kundennummer: Kundennummer,\n    adresse: {strasse, plz, ort, land},\n    ust_id: USt-IdNr. des Kunden falls B2B\n  }\n- bezug_dokumente: {\n    auftrag: Auftragsnummer,\n    angebot: Angebotsnummer,\n    lieferschein: Lieferscheinnummer,\n    bestellung_kunde: Bestellnummer des Kunden\n  }\n- positionen: [{\n    pos_nr: Position,\n    artikel_nr: Artikelnummer,\n    beschreibung: Beschreibung,\n    menge: Menge,\n    einheit: Einheit,\n    einzelpreis_netto: Einzelpreis,\n    rabatt_prozent: Rabatt,\n    gesamtpreis_netto: Gesamtpreis netto\n  }]\n- summe_positionen_netto: Summe der Positionen\n- rabatt_gesamt: {\n    prozent: Gesamtrabatt %,\n    betrag: Rabattbetrag\n  }\n- zwischensumme_netto: Nach Rabatt\n- versandkosten_netto: Versandkosten\n- montagekosten_netto: Montagekosten\n- summe_netto: Nettosumme gesamt\n- mwst_positionen: [{\n    satz: MwSt-Satz %,\n    netto_basis: Basis,\n    mwst_betrag: Betrag\n  }]\n- mwst_gesamt: Gesamte MwSt\n- summe_brutto: Bruttosumme\n- anzahlungen: [{\n    datum: Datum,\n    betrag: Betrag,\n    rechnung_nr: Anzahlungsrechnung-Nr.\n  }]\n- offener_betrag: Noch zu zahlender Betrag\n- zahlungsbedingungen: {\n    zahlungsziel_tage: Zahlungsziel,\n    faellig_am: Fälligkeitsdatum (YYYY-MM-DD),\n    skonto_prozent: Skonto %,\n    skonto_tage: Skontofrist,\n    skonto_betrag: Skontobetrag bei Nutzung\n  }\n- bankverbindung: {\n    bank: Bankname,\n    iban: IBAN,\n    bic: BIC,\n    kontoinhaber: Kontoinhaber\n  }\n- reverse_charge: true/false\n- kleinunternehmer: true/false\n- bemerkungen: Hinweise\n\n### Zahlungserinnerung\nExtrahiere:\n- erinnerung_nummer: Erinnerungsnummer falls vorhanden\n- erinnerung_datum: Datum (YYYY-MM-DD)\n- aussteller: {\n    firma: Absender,\n    adresse: {strasse, plz, ort},\n    telefon: Telefon,\n    email: E-Mail\n  }\n- empfaenger: {\n    firma: Empfänger,\n    name: Name,\n    kundennummer: Kundennummer,\n    adresse: {strasse, plz, ort}\n  }\n- offene_posten: [{\n    rechnung_nummer: Rechnungsnummer,\n    rechnung_datum: Rechnungsdatum (YYYY-MM-DD),\n    ursprungsbetrag: Ursprünglicher Rechnungsbetrag,\n    bereits_gezahlt: Bereits gezahlter Betrag,\n    offener_betrag: Offener Betrag,\n    faellig_seit: Fälligkeitsdatum (YYYY-MM-DD),\n    ueberfaellig_tage: Tage überfällig\n  }]\n- gesamtforderung: Gesamter offener Betrag\n- neue_zahlungsfrist: Neues Zahlungsziel (YYYY-MM-DD)\n- bankverbindung: {\n    bank: Bank,\n    iban: IBAN,\n    bic: BIC\n  }\n- ton: freundlich/bestimmt (aus Formulierung ableiten)\n- mahngebuehren: Mahngebühren falls genannt\n- verzugszinsen: Verzugszinsen falls genannt\n- naechste_eskalationsstufe: Hinweis auf Mahnung falls vorhanden\n- bemerkungen: Sonstige Hinweise\n\n### Mahnung\nExtrahiere:\n- mahnung_nummer: Mahnungsnummer\n- mahnung_stufe: 1/2/3 (erste, zweite, dritte Mahnung)\n- mahnung_datum: Datum (YYYY-MM-DD)\n- aussteller: {\n    firma: Absender,\n    adresse: {strasse, plz, ort},\n    telefon: Telefon,\n    email: E-Mail,\n    rechtsanwalt: falls anwaltliche Mahnung\n  }\n- empfaenger: {\n    firma: Empfänger,\n    name: Name,\n    kundennummer: Kundennummer,\n    adresse: {strasse, plz, ort}\n  }\n- offene_posten: [{\n    rechnung_nummer: Rechnungsnummer,\n    rechnung_datum: Rechnungsdatum (YYYY-MM-DD),\n    ursprungsbetrag: Ursprungsbetrag,\n    offener_betrag: Offener Betrag,\n    faellig_seit: Fälligkeitsdatum (YYYY-MM-DD),\n    ueberfaellig_tage: Überfällig in Tagen\n  }]\n- hauptforderung: Summe der offenen Rechnungsbeträge\n- mahngebuehren: Mahnkosten\n- verzugszinsen: {\n    zinssatz: Zinssatz %,\n    zeitraum_von: Von-Datum,\n    zeitraum_bis: Bis-Datum,\n    betrag: Zinsbetrag\n  }\n- inkassokosten: Inkassokosten falls vorhanden\n- rechtsanwaltskosten: Anwaltskosten falls vorhanden\n- gesamtforderung: Gesamter Forderungsbetrag\n- zahlungsfrist: Zahlungsfrist (YYYY-MM-DD)\n- bankverbindung: {\n    bank: Bank,\n    iban: IBAN,\n    bic: BIC,\n    verwendungszweck: Verwendungszweck\n  }\n- androhung: {\n    inkasso: true/false,\n    gerichtlich: true/false,\n    schufa: true/false\n  }\n- letzte_chance: true/false (letzte Mahnung vor Inkasso)\n- bemerkungen: Weitere Hinweise\n\n### Notiz\nExtrahiere:\n- notiz_datum: Datum falls erkennbar (YYYY-MM-DD)\n- notiz_uhrzeit: Uhrzeit falls erkennbar\n- verfasser: Name des Verfassers falls erkennbar\n- betreff: Betreff/Thema\n- bezug: {\n    kunde: Kundenname,\n    kundennummer: Kundennummer,\n    auftrag: Auftragsnummer,\n    projekt: Projektname,\n    dokument: Bezugsdokument\n  }\n- inhalt: Vollständiger Notiztext\n- kategorien: [Kategorien falls erkennbar, z.B. Telefonat, Kundenbesuch, intern]\n- action_items: [{\n    aufgabe: Beschreibung,\n    verantwortlich: Person,\n    bis_datum: Deadline falls genannt\n  }]\n- prioritaet: hoch/mittel/niedrig falls erkennbar\n- follow_up_erforderlich: true/false\n- follow_up_datum: Wiedervorlagedatum falls genannt\n\n### Skizze\nExtrahiere:\n- skizze_datum: Datum falls erkennbar (YYYY-MM-DD)\n- ersteller: Name falls erkennbar\n- projekt: {\n    name: Projektname,\n    kunde: Kundenname,\n    adresse: Projektadresse\n  }\n- objekttyp: Fenster/Tür/Fassade/etc.\n- masse: {\n    breite: Breite in mm,\n    hoehe: Höhe in mm,\n    tiefe: Tiefe/Einbautiefe falls angegeben\n  }\n- beschriftungen: [Alle lesbaren Beschriftungen und Maße]\n- besonderheiten: [Erkannte Besonderheiten wie Rundbögen, Sprossen, etc.]\n- ansicht: Innenansicht/Außenansicht/Draufsicht falls erkennbar\n- massstab: Maßstab falls angegeben\n- bemerkungen: Handschriftliche Notizen soweit lesbar\n- elemente_erkannt: [{\n    typ: Elementtyp,\n    position: Lage,\n    masse: Maße,\n    oeffnungsart: falls erkennbar\n  }]\n\n### Brief_an_Kunde\nExtrahiere:\n- brief_datum: Datum (YYYY-MM-DD)\n- absender: {\n    firma: J.S. Fenster Türen,\n    adresse: {strasse, plz, ort},\n    ansprechpartner: Sachbearbeiter,\n    telefon: Telefon,\n    email: E-Mail\n  }\n- empfaenger: {\n    firma: Kundenname,\n    name: Name,\n    kundennummer: Kundennummer,\n    adresse: {strasse, plz, ort}\n  }\n- betreff: Betreffzeile\n- bezug: {\n    ihr_zeichen: Kundenzeichen,\n    unser_zeichen: Unser Zeichen,\n    auftrag: Auftragsnummer,\n    angebot: Angebotsnummer,\n    datum_vorheriger_brief: falls Bezug auf früheren Brief\n  }\n- anrede: Anredeform\n- inhalt_zusammenfassung: Kurze Zusammenfassung des Briefinhalts\n- inhalt_kategorien: [z.B. Terminankündigung, Reklamation, Information, Anfrage]\n- genannte_termine: [{\n    art: Art des Termins,\n    datum: Datum (YYYY-MM-DD),\n    uhrzeit: Uhrzeit\n  }]\n- genannte_betraege: [{\n    beschreibung: Wofür,\n    betrag: Betrag\n  }]\n- handlungsaufforderungen: [Was der Kunde tun soll]\n- anlagen: [Liste der Anlagen]\n- grussformel: Grußformel\n- unterschrift: Unterschreibender\n\n### Brief_von_Kunde\nExtrahiere:\n- brief_datum: Datum (YYYY-MM-DD)\n- eingangsdatum: Eingangsstempel falls erkennbar (YYYY-MM-DD)\n- absender: {\n    firma: Kundenname,\n    name: Name,\n    adresse: {strasse, plz, ort},\n    telefon: Telefon,\n    email: E-Mail,\n    kundennummer: falls bekannt\n  }\n- empfaenger: {\n    firma: J.S. Fenster Türen,\n    ansprechpartner: An wen gerichtet\n  }\n- betreff: Betreffzeile\n- bezug: {\n    ihr_zeichen: Unser Zeichen,\n    auftrag: Auftragsnummer,\n    angebot: Angebotsnummer,\n    rechnung: Rechnungsnummer\n  }\n- inhalt_zusammenfassung: Kurze Zusammenfassung\n- inhalt_kategorien: [z.B. Reklamation, Anfrage, Bestellung, Beschwerde, Lob]\n- anfragen: [Konkrete Fragen/Anfragen des Kunden]\n- beschwerden: [{\n    gegenstand: Was wird bemängelt,\n    schweregrad: leicht/mittel/schwer (einschätzen)\n  }]\n- wuensche: [Kundenwünsche]\n- fristen_genannt: [{\n    beschreibung: Wofür,\n    datum: Datum (YYYY-MM-DD)\n  }]\n- anlagen: [Liste der Anlagen]\n- dringlichkeit: hoch/mittel/niedrig (aus Ton ableiten)\n- antwort_erforderlich: true/false\n- antwort_bis: Antwortfrist falls genannt (YYYY-MM-DD)\n\n### Brief_von_Finanzamt\nExtrahiere:\n- brief_datum: Datum (YYYY-MM-DD)\n- eingangsdatum: Eingangsstempel (YYYY-MM-DD)\n- finanzamt: {\n    name: Name des Finanzamts,\n    adresse: {strasse, plz, ort},\n    telefon: Telefon,\n    aktenzeichen: Aktenzeichen,\n    steuernummer: Steuernummer\n  }\n- empfaenger: {\n    firma: J.S. Fenster Türen,\n    adresse: {strasse, plz, ort}\n  }\n- dokumentenart: [z.B. Steuerbescheid, Vorauszahlungsbescheid, Anfrage, Mahnung, Prüfungsankündigung]\n- betreff: Betreffzeile\n- steuerart: Einkommensteuer/Körperschaftsteuer/Umsatzsteuer/Gewerbesteuer/etc.\n- zeitraum: {\n    jahr: Betroffenes Jahr,\n    quartal: Quartal falls relevant,\n    von: Von-Datum,\n    bis: Bis-Datum\n  }\n- festsetzungen: [{\n    steuerart: Art der Steuer,\n    betrag: Festgesetzter Betrag,\n    bereits_gezahlt: Bereits gezahlt,\n    nachzahlung: Nachzahlungsbetrag,\n    erstattung: Erstattungsbetrag\n  }]\n- vorauszahlungen: [{\n    zeitraum: Für welchen Zeitraum,\n    betrag: Vorauszahlungsbetrag,\n    faellig_am: Fälligkeitsdatum (YYYY-MM-DD)\n  }]\n- fristen: [{\n    art: Einspruchsfrist/Zahlungsfrist/Abgabefrist,\n    datum: Fristdatum (YYYY-MM-DD)\n  }]\n- zahlungsdaten: {\n    betrag: Zu zahlender Betrag,\n    faellig_am: Fälligkeitsdatum (YYYY-MM-DD),\n    empfaenger: Zahlungsempfänger,\n    iban: IBAN,\n    verwendungszweck: Verwendungszweck\n  }\n- erforderliche_unterlagen: [Angeforderte Dokumente]\n- rechtsbehelfsbelehrung: true/false\n- einspruchsfrist: Einspruchsfrist (YYYY-MM-DD)\n- ansprechpartner: {\n    name: Sachbearbeiter,\n    telefon: Telefon,\n    zimmer: Zimmernummer\n  }\n- bemerkungen: Wichtige Hinweise\n\n### Brief_von_Amt\nExtrahiere:\n- brief_datum: Datum (YYYY-MM-DD)\n- eingangsdatum: Eingangsstempel (YYYY-MM-DD)\n- behoerde: {\n    name: Name der Behörde,\n    abteilung: Abteilung,\n    adresse: {strasse, plz, ort},\n    telefon: Telefon,\n    email: E-Mail,\n    aktenzeichen: Aktenzeichen/Geschäftszeichen\n  }\n- empfaenger: {\n    firma: J.S. Fenster Türen,\n    adresse: {strasse, plz, ort}\n  }\n- dokumentenart: [z.B. Genehmigung, Bescheid, Anforderung, Einladung, Anhörung]\n- betreff: Betreffzeile\n- bezug: {\n    antrag_vom: Datum unseres Antrags,\n    aktenzeichen_alt: Früheres Aktenzeichen,\n    vorgang: Vorgangsbeschreibung\n  }\n- inhalt_zusammenfassung: Kurze Zusammenfassung\n- entscheidung: {\n    art: Genehmigung/Ablehnung/Teilgenehmigung,\n    auflagen: [Liste von Auflagen],\n    befristung: Befristungsdatum falls vorhanden\n  }\n- fristen: [{\n    art: Fristbeschreibung,\n    datum: Fristdatum (YYYY-MM-DD)\n  }]\n- gebuehren: {\n    betrag: Gebührenbetrag,\n    faellig_am: Fälligkeitsdatum (YYYY-MM-DD),\n    zahlungsempfaenger: Empfänger,\n    iban: IBAN,\n    verwendungszweck: Verwendungszweck\n  }\n- erforderliche_handlungen: [Was wir tun müssen]\n- erforderliche_unterlagen: [Einzureichende Dokumente]\n- rechtsbehelfsbelehrung: true/false\n- rechtsmittelfrist: Frist für Widerspruch (YYYY-MM-DD)\n- ansprechpartner: {\n    name: Sachbearbeiter,\n    telefon: Telefon,\n    email: E-Mail,\n    sprechzeiten: Sprechzeiten\n  }\n- termin: {\n    art: Terminart,\n    datum: Datum (YYYY-MM-DD),\n    uhrzeit: Uhrzeit,\n    ort: Ort\n  }\n- bemerkungen: Wichtige Hinweise\n\n### Sonstiges_Dokument\nExtrahiere:\n- dokument_datum: Erkanntes Datum (YYYY-MM-DD)\n- dokumententyp_vermutet: Vermuteter Dokumententyp\n- absender: {\n    firma: Absender falls erkennbar,\n    name: Name,\n    adresse: {strasse, plz, ort}\n  }\n- empfaenger: {\n    firma: Empfänger falls erkennbar,\n    name: Name,\n    adresse: {strasse, plz, ort}\n  }\n- betreff: Betreff/Titel falls vorhanden\n- inhalt_zusammenfassung: Zusammenfassung des Inhalts\n- erkannte_referenzen: {\n    nummern: [Alle erkannten Referenznummern],\n    daten: [Alle erkannten Daten],\n    betraege: [Alle erkannten Geldbeträge],\n    personen: [Genannte Personen],\n    firmen: [Genannte Firmen]\n  }\n- handlungsbedarf: true/false (einschätzen)\n- dringlichkeit: hoch/mittel/niedrig (einschätzen)\n- kategorisierungsvorschlag: Vorschlag für bessere Kategorisierung\n- bemerkungen: Sonstige relevante Informationen\n\n---\n\n## ALLGEMEINE REGELN\n\n1. DATENQUALITÄT:\n   - Extrahiere nur Informationen, die tatsächlich im Text vorhanden sind\n   - Setze nicht vorhandene Felder auf null\n   - Markiere unsichere Extraktionen mit dem Suffix \"_unsicher\": true\n   - Bei Beträgen: Immer als Zahl ohne Währungssymbol, Dezimaltrenner ist Punkt\n   - Bei Daten: Immer ISO 8601 Format (YYYY-MM-DD)\n\n2. WÄHRUNG UND ZAHLEN:\n   - Alle Geldbeträge als float mit maximal 2 Dezimalstellen\n   - Währung separat erfassen falls nicht EUR\n   - Tausendertrennzeichen entfernen\n\n3. ADRESSEN:\n   - Straße inkl. Hausnummer im Feld \"strasse\"\n   - PLZ immer als String (wegen führender Nullen)\n   - \"land\" nur wenn nicht Deutschland\n\n4. FEHLENDE INFORMATIONEN:\n   - Pflichtfelder mit null füllen, nicht weglassen\n   - Optionale Felder weglassen wenn nicht vorhanden\n\n5. MEHRDEUTIGKEITEN:\n   - Bei mehreren möglichen Interpretationen: Konservativste wählen\n   - Im Feld \"extraktions_hinweise\" dokumentieren\n\n---\n\n## OUTPUT-STRUKTUR\n\nDas JSON-Objekt muss folgende Metadaten enthalten:\n\n{\n  \"meta\": {\n    \"kategorie\": \"Die erkannte Kategorie\",\n    \"dokument_url\": \"URL des gespeicherten Dokuments\",\n    \"extraktions_zeitstempel\": \"ISO 8601 Zeitstempel\",\n    \"extraktions_qualitaet\": \"hoch/mittel/niedrig\",\n    \"extraktions_hinweise\": [\"Liste von Hinweisen zu Unsicherheiten oder Problemen\"]\n  },\n  \"daten\": {\n    // Hier die kategoriespezifischen extrahierten Daten\n  }\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        3360,
+        576
+      ],
+      "id": "4a3e1fb6-0c41-4785-9736-c9a1fb089ef2",
+      "name": "AI Agent3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.2",
+          "mode": "list",
+          "cachedResultName": "gpt-5.2"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        3360,
+        800
+      ],
+      "id": "0d38c920-e635-4fe5-9d91-bf43df525b20",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "38JzdD7z1k5DGzY6",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://rsmjgdujlpnydbsfuiek.supabase.co/storage/v1/object/documents/{{ $('AI Agent2').item.json.output.trim() }}_{{ $now.format('dd-MM-yyyy_HH-mm-ss-SSS') }}.pdf",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/pdf"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3168,
+        576
+      ],
+      "id": "d4bfece6-9054-4660-be91-687bad5fe8bb",
+      "name": "Supabase:Datei in Bucket speichern",
+      "credentials": {
+        "supabaseApi": {
+          "id": "cn7mhwSQQGIhfVBM",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Code in JavaScript": {
+      "main": [
+        []
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Extract text1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Extract text1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Supabase:Datei in Bucket speichern",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase:Datei in Bucket speichern": {
+      "main": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Webhook1": [
+      {
+        "headers": {
+          "host": "js-fenster.app.n8n.cloud",
+          "user-agent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; de-DE) WindowsPowerShell/5.1.17763.8024",
+          "content-length": "78761",
+          "accept-encoding": "gzip, br",
+          "cdn-loop": "cloudflare; loops=1; subreqs=1",
+          "cf-connecting-ip": "79.204.109.155",
+          "cf-ew-via": "15",
+          "cf-ipcountry": "DE",
+          "cf-ray": "9b22b97a14b26668-AMS",
+          "cf-visitor": "{\"scheme\":\"https\"}",
+          "cf-worker": "n8n.cloud",
+          "content-type": "multipart/form-data; boundary=0fb9af75-9649-4b16-8fd0-2eb0d4dccef9",
+          "x-forwarded-for": "79.204.109.155, 172.71.103.110",
+          "x-forwarded-host": "js-fenster.app.n8n.cloud",
+          "x-forwarded-port": "443",
+          "x-forwarded-proto": "https",
+          "x-forwarded-server": "traefik-prod-users-gwc-108-67dcdbdbcd-rzdml",
+          "x-is-trusted": "yes",
+          "x-real-ip": "79.204.109.155"
+        },
+        "params": {},
+        "query": {},
+        "body": {},
+        "webhookUrl": "https://js-fenster.app.n8n.cloud/webhook/4b49adb1-796b-4818-af75-0ac495f0e389",
+        "executionMode": "production"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "91364ce6142e16bf7f31c26d6681afb2f6070ecb136c81acb15060218bc82571"
+  }
+}

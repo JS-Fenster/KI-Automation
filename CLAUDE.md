@@ -36,7 +36,8 @@ KI_Automation/
 │   └── claude_md_helper.py # CLAUDE.md Sync-Funktionen
 ├── tools/                  # Alle Tool-Projekte
 │   ├── KI_Wissen/          # Woechentlicher KI-News Updater
-│   └── Scanner_Webhook/    # Scanner-Ordner Watcher → n8n Webhook
+│   ├── Scanner_Webhook/    # Scanner-Ordner Watcher → Supabase Edge Function
+│   └── dokumentenmanagement/ # PDF-Verarbeitung (OCR, Kategorisierung, Extraktion)
 ├── docs/                   # Wissensdatenbanken
 │   ├── ERP_Datenbank.md    # SQL Server Schema + Spalten-Korrekturen
 │   └── KI_Wissen.md        # Aktuelle KI/Automation-Tools (auto-updated)
@@ -113,6 +114,7 @@ git config user.email "info@js-fenster.de"
 |------|------|--------|
 | **JS-Prozesse** | `../JS-Prozesse/` | Ideen, Prozess-Analysen, Planung |
 | **Auftragsmanagement** | `../Auftragsmanagement/` | Web-App fuer Auftragsverwaltung |
+| **erp-system-vite** | `../erp-system-vite/` | ERP Frontend (Vite + React + Supabase) |
 
 > **Bei Firma-Projekten:** Auch `../JS-Prozesse/CLAUDE.md` einlesen!
 > **Neue Ideen (Arbeit):** `../JS-Prozesse/IDEEN.md`
@@ -207,6 +209,9 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 | 2025-12-19 | Rechner-Erkennung | +JS-FENSTER, +PC003 (Arbeit) |
 | 2025-12-19 | Struktur bereinigt | SQL-Details nach ERP_Datenbank.md verschoben, Dopplungen entfernt |
 | 2025-12-20 | Scanner_Webhook | Von n8n_Installation/ nach tools/ verschoben, n8n_Installation/ geloescht |
+| 2025-12-22 | erp-system-vite | Neues Repo: ERP Frontend (Vite + React + Supabase) |
+| 2025-12-27 | dokumentenmanagement | Neues Tool: PDF-Verarbeitung via Supabase Edge Function (OCR+GPT-5.2) |
+| 2025-12-27 | Scanner_Webhook | Umgestellt von n8n auf Supabase, robustere Task-Konfiguration |
 
 <!-- KI-WISSEN-START -->
 ## KI-Wissen (Auto-generiert)
