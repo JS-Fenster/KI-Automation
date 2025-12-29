@@ -146,6 +146,19 @@ function Start-FolderWatcher {
             return
         }
 
+        # Skip small PNGs (<100KB) - likely QR codes already embedded in invoices
+        $extension = [System.IO.Path]::GetExtension($path).ToLower()
+        if ($extension -eq ".png") {
+            Start-Sleep -Milliseconds 500  # Wait for file to be written
+            if (Test-Path $path) {
+                $fileSize = (Get-Item $path).Length
+                if ($fileSize -lt 100KB) {
+                    Write-Log "SKIP: Kleine PNG-Datei (vermutlich QR-Code): $name ($([math]::Round($fileSize/1KB, 1)) KB)"
+                    return
+                }
+            }
+        }
+
         Write-Log "Neue Datei erkannt: $name"
         Send-FileToWebhook -FilePath $path
     }
