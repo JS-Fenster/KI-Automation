@@ -247,14 +247,15 @@ ORDER BY TABLE_NAME
 
 ## Remote-Zugriff: Cloudflare Tunnel
 
-**Status:** AKTIV | **Domain:** `js-fenster-intern.org` | **Getestet:** 2025-12-08
+**Status:** AKTIV | **Domain:** `js-fenster-intern.org` | **Getestet:** 2025-12-29
 
 ### Zugaenge
 
-| Dienst | Hostname | Lokaler Port |
-|--------|----------|--------------|
-| RDP | `rdp.js-fenster-intern.org` | 3389 |
-| SQL | `sql.js-fenster-intern.org` | 1433 |
+| Dienst | Server | Hostname | Lokaler Port |
+|--------|--------|----------|--------------|
+| RDP | AppServer (202) | `rdp.js-fenster-intern.org` | 3389 |
+| RDP | DC (201) | `dc-rdp.js-fenster-intern.org` | 3390 |
+| SQL | AppServer (202) | `sql.js-fenster-intern.org` | 1433 |
 
 ### Client-Verbindung
 
@@ -307,6 +308,7 @@ conn = pymssql.connect(
 
 | Datum | Aenderung |
 |-------|-----------|
+| 2025-12-29 | DC-RDP Tunnel hinzugefuegt (dc-rdp.js-fenster-intern.org:3390) |
 | 2025-12-12 | **NEU:** Timestamp-Spalten dokumentiert (UpdateTime, InsertTime, etc.) - ermoeglicht Delta-Sync |
 | 2025-12-11 | **KORRIGIERT:** Auftrag = Angebot mit AuftragsDatum, Bestellung→Lieferant via SDObjMemberCode, Kunden-Spalten korrigiert |
 | 2025-12-11 | **GEKUERZT:** Auto-generiertes 18k-Zeilen-Schema entfernt, nur relevante Infos behalten |

@@ -1,6 +1,6 @@
 # Server-Infrastruktur
 
-> **Stand:** 2025-12-20 | **Netzwerk:** 192.168.16.x
+> **Stand:** 2025-12-29 | **Netzwerk:** 192.168.16.x
 
 ---
 
@@ -59,12 +59,36 @@
 
 ---
 
-## Remote-Zugriff
+## Remote-Zugriff (Cloudflare Tunnel)
 
-| Dienst | Hostname | Methode |
-|--------|----------|---------|
-| SQL Server | `sql.js-fenster-intern.org` | Cloudflare Tunnel |
-| RDP | `rdp.js-fenster-intern.org` | Cloudflare Tunnel |
+| Dienst | Server | Hostname | Lokaler Port |
+|--------|--------|----------|--------------|
+| RDP | AppServer (202) | `rdp.js-fenster-intern.org` | `localhost:3389` |
+| RDP | DC (201) | `dc-rdp.js-fenster-intern.org` | `localhost:3390` |
+| SQL | AppServer (202) | `sql.js-fenster-intern.org` | `localhost:1433` |
+
+### Tunnel-Uebersicht
+
+| Tunnel-Name | Server | Status |
+|-------------|--------|--------|
+| `js-fenster-server` | AppServer (202) | Aktiv |
+| `dc-server` | DC (201) | Aktiv |
+
+### Client-Verbindung
+
+```bash
+# cloudflared installieren (einmalig)
+winget install Cloudflare.cloudflared
+
+# RDP zum AppServer (202)
+cloudflared access rdp --hostname rdp.js-fenster-intern.org --url localhost:3389
+
+# RDP zum DC (201)
+cloudflared access rdp --hostname dc-rdp.js-fenster-intern.org --url localhost:3390
+
+# SQL Server
+cloudflared access tcp --hostname sql.js-fenster-intern.org --url localhost:1433
+```
 
 > **Details:** Siehe `ERP_Datenbank.md` → Remote-Zugriff: Cloudflare Tunnel
 
@@ -74,6 +98,7 @@
 
 | Datum | Aenderung |
 |-------|-----------|
+| 2025-12-29 | DC-RDP Tunnel hinzugefuegt (dc-rdp.js-fenster-intern.org) |
 | 2025-12-19 | Initial - Hyper-V Infrastruktur dokumentiert |
 | 2025-12-19 | Dateiablage und Remote-Zugriff ergaenzt |
 | 2025-12-19 | n8n-server VM erstellt (Debian 13, Docker, n8n) |
