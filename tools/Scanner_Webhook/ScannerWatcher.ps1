@@ -141,13 +141,19 @@ function Start-FolderWatcher {
         $name = $Event.SourceEventArgs.Name
         $changeType = $Event.SourceEventArgs.ChangeType
 
-        # Ignoriere Thumbs.db und temporaere Dateien
+        # Ignoriere Thumbs.db, temporaere Dateien und Outlook E-Mails
         if ($name -match "^(Thumbs\.db|~\$|\.tmp)") {
             return
         }
 
-        # Skip small PNGs (<100KB) - likely QR codes already embedded in invoices
+        # Skip MSG files (Outlook emails)
         $extension = [System.IO.Path]::GetExtension($path).ToLower()
+        if ($extension -eq ".msg") {
+            Write-Log "SKIP: Outlook E-Mail: $name"
+            return
+        }
+
+        # Skip small PNGs (<100KB) - likely QR codes already embedded in invoices
         if ($extension -eq ".png") {
             Start-Sleep -Milliseconds 500  # Wait for file to be written
             if (Test-Path $path) {
