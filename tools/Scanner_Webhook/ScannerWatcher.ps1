@@ -132,7 +132,7 @@ function Start-FolderWatcher {
     $watcher = New-Object System.IO.FileSystemWatcher
     $watcher.Path = $WatchFolder
     $watcher.Filter = "*.*"
-    $watcher.IncludeSubdirectories = $false
+    $watcher.IncludeSubdirectories = $true
     $watcher.EnableRaisingEvents = $true
 
     # Event-Handler fuer neue Dateien
