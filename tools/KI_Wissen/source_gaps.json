@@ -1,5 +1,5 @@
 {
-  "analyzed_at": "2025-12-20T12:21:38.623859",
+  "analyzed_at": "2026-01-05T17:09:17.600646",
   "total_topics": 69,
   "low_coverage_topics": [
     {
@@ -23,6 +23,11 @@
       "search_suggestion": "haiku RSS feed blog 2025"
     },
     {
+      "topic": "model context protocol",
+      "count": 0,
+      "search_suggestion": "model context protocol RSS feed blog 2025"
+    },
+    {
       "topic": "tool use",
       "count": 0,
       "search_suggestion": "tool use RSS feed blog 2025"
@@ -33,8 +38,13 @@
       "search_suggestion": "function calling RSS feed blog 2025"
     },
     {
+      "topic": "ocr",
+      "count": 1,
+      "search_suggestion": "ocr RSS feed blog 2025"
+    },
+    {
       "topic": "pdf",
-      "count": 0,
+      "count": 1,
       "search_suggestion": "pdf RSS feed blog 2025"
     },
     {
@@ -48,13 +58,8 @@
       "search_suggestion": "zapier RSS feed blog 2025"
     },
     {
-      "topic": "embedding",
-      "count": 1,
-      "search_suggestion": "embedding RSS feed blog 2025"
-    },
-    {
       "topic": "speech",
-      "count": 1,
+      "count": 0,
       "search_suggestion": "speech RSS feed blog 2025"
     },
     {
@@ -78,14 +83,29 @@
       "search_suggestion": "mistral RSS feed blog 2025"
     },
     {
+      "topic": "fine-tune",
+      "count": 1,
+      "search_suggestion": "fine-tune RSS feed blog 2025"
+    },
+    {
+      "topic": "fine-tuning",
+      "count": 1,
+      "search_suggestion": "fine-tuning RSS feed blog 2025"
+    },
+    {
       "topic": "lora",
-      "count": 0,
+      "count": 1,
       "search_suggestion": "lora RSS feed blog 2025"
     },
     {
       "topic": "qlora",
       "count": 0,
       "search_suggestion": "qlora RSS feed blog 2025"
+    },
+    {
+      "topic": "github copilot",
+      "count": 1,
+      "search_suggestion": "github copilot RSS feed blog 2025"
     },
     {
       "topic": "codeium",
@@ -189,22 +209,26 @@
   "well_covered_topics": [
     {
       "topic": "agent",
-      "count": 30
+      "count": 42
+    },
+    {
+      "topic": "api",
+      "count": 17
+    },
+    {
+      "topic": "rag",
+      "count": 16
     },
     {
       "topic": "workflow",
       "count": 12
     },
     {
-      "topic": "api",
-      "count": 11
-    },
-    {
-      "topic": "rag",
+      "topic": "agentic",
       "count": 10
     },
     {
-      "topic": "llama",
+      "topic": "gemini",
       "count": 9
     },
     {
@@ -212,16 +236,12 @@
       "count": 9
     },
     {
-      "topic": "gemini",
+      "topic": "llama",
       "count": 8
     },
     {
       "topic": "windsurf",
       "count": 8
-    },
-    {
-      "topic": "copilot",
-      "count": 7
     },
     {
       "topic": "llamaindex",
@@ -231,14 +251,14 @@
   "recommendations": [
     {
       "type": "search_new_sources",
-      "message": "36 Topics haben geringe Abdeckung",
+      "message": "40 Topics haben geringe Abdeckung",
       "action": "Claude sollte nach neuen RSS-Feeds für diese Topics suchen",
       "topics": [
         "claude code",
         "sonnet",
         "opus",
         "haiku",
-        "tool use"
+        "model context protocol"
       ]
     },
     {

@@ -94,10 +94,19 @@ cloudflared access tcp --hostname sql.js-fenster-intern.org --url localhost:1433
 
 ---
 
+## Deaktivierte Dienste (HYPERV)
+
+| Dienst | Grund | Rueckgaengig |
+|--------|-------|--------------|
+| IAStorIcon.exe | Memory-Leak (100MB → GB), Intel VROC nicht verwendet (Avago RAID aktiv) | `Rename-Item "C:\Program Files\Intel\Intel(R) Virtual RAID on CPU\IAStorIcon.exe.DISABLED" "IAStorIcon.exe"` |
+
+---
+
 ## Changelog
 
 | Datum | Aenderung |
 |-------|-----------|
+| 2026-01-05 | IAStorIcon.exe deaktiviert (Memory-Leak, VROC nicht verwendet) |
 | 2025-12-29 | DC-RDP Tunnel hinzugefuegt (dc-rdp.js-fenster-intern.org) |
 | 2025-12-19 | Initial - Hyper-V Infrastruktur dokumentiert |
 | 2025-12-19 | Dateiablage und Remote-Zugriff ergaenzt |
