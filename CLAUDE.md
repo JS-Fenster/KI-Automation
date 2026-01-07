@@ -13,8 +13,8 @@
 | **Ansprache** | Mit Vornamen (Andreas) |
 | **Sprache** | Deutsch (Konversation), Englisch (Code) |
 | **Code-Standard** | ASCII-only in Code, Variablen/Funktionen auf Englisch, Kommentare auf Englisch |
-| **Umlaute (ä/ö/ü/ß)** | ✅ In sichtbaren UI-Texten (Labels, Buttons, Dialoge) |
-| | ❌ Im Code (Variablen, Funktionen, Kommentare, Docstrings, Logging) → ae/oe/ue/ss |
+| **Umlaute (ä/ö/ü/ß)** | ✅ In UI-Texten (String-Literale fuer Labels, Buttons, Dialoge, Fehlermeldungen) |
+| | ❌ In Code-Konstrukten (Variablen, Funktionen, Kommentare, Docstrings) → ae/oe/ue/ss |
 | **Entscheidungen** | Selbststaendig treffen wenn moeglich |
 | **Rueckfragen** | Bei Unklarheiten immer nachfragen |
 | **Dokumentation** | Dateien synchron halten, Redundanzen vermeiden |
@@ -105,6 +105,65 @@ git config user.email "info@js-fenster.de"
 **Git-Workflow (Fehler vermeiden):**
 1. Vor Push: `git pull --rebase` (verhindert reject)
 2. Kein `rsync` verfuegbar - `cp -r` nutzen
+
+---
+
+## Entwicklungs-Workflow (Pflicht!)
+
+> **WICHTIG:** Diese Regeln IMMER befolgen um Regressionen zu vermeiden!
+
+### Vor JEDER Code-Aenderung
+
+1. **Speicherpunkt erstellen**
+   ```bash
+   git add . && git commit -m "SAVE: vor [Beschreibung]"
+   ```
+
+2. **Verstehen was geaendert wird**
+   - Welche Dateien sind betroffen?
+   - Was koennte dadurch kaputtgehen?
+
+### Waehrend der Aenderung
+
+3. **Eine Sache auf einmal**
+   - NUR das gewuenschte Feature/Fix
+   - NICHT "nebenbei" andere Dinge verbessern
+   - NICHT refactoren wenn nicht explizit gewuenscht
+
+### Nach JEDER Aenderung
+
+4. **Sofort testen**
+   - Programm starten
+   - Geaenderte Funktion testen
+   - AUCH bestehende Funktionen pruefen (Buttons, Seiten, etc.)
+
+5. **Bei Fehler: Sofort zurueck**
+   ```bash
+   git checkout .
+   ```
+   Dann: Neu anfangen mit kleinerem Schritt
+
+6. **Bei Erfolg: Speichern**
+   ```bash
+   git add . && git commit -m "OK: [Was jetzt funktioniert]"
+   ```
+
+### Commit-Nachrichten Schema
+
+| Prefix | Bedeutung | Beispiel |
+|--------|-----------|----------|
+| `SAVE:` | Speicherpunkt vor Aenderung | `SAVE: vor Button-Fix` |
+| `OK:` | Funktionierende Aenderung | `OK: Button funktioniert` |
+| `WIP:` | Work in Progress | `WIP: Button teilweise` |
+
+### Projekt mit PLAN.md
+
+Wenn ein Projekt eine `PLAN.md` Datei hat:
+1. Bei Session-Start: PLAN.md lesen
+2. Naechsten offenen Schritt (⏳) finden
+3. NUR diesen Schritt ausfuehren
+4. Nach Erfolg: Status auf ✅ setzen
+5. Session beenden oder naechsten Schritt
 
 ---
 
@@ -212,6 +271,7 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 | 2025-12-22 | erp-system-vite | Neues Repo: ERP Frontend (Vite + React + Supabase) |
 | 2025-12-27 | dokumentenmanagement | Neues Tool: PDF-Verarbeitung via Supabase Edge Function (OCR+GPT-5.2) |
 | 2025-12-27 | Scanner_Webhook | Umgestellt von n8n auf Supabase, robustere Task-Konfiguration |
+| 2026-01-07 | Entwicklungs-Workflow | Speicherpunkte + PLAN.md Workflow fuer alle Projekte |
 
 <!-- KI-WISSEN-START -->
 ## KI-Wissen (Auto-generiert)
