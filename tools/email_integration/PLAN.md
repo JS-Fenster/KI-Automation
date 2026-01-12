@@ -1,7 +1,7 @@
 # E-Mail Integration - Projektdokumentation
 
 > **Projekt:** E-Mail-Kanal als Input fuer Dokumentenmanagement
-> **Status:** In Planung
+> **Status:** Phase 2 abgeschlossen (Azure Setup)
 > **Erstellt:** 2026-01-12
 > **Letzte Aktualisierung:** 2026-01-12
 
@@ -362,12 +362,13 @@ CREATE INDEX IF NOT EXISTS idx_documents_tracking_nummer ON documents(tracking_n
 - [x] Datenbank-Schema planen
 - [ ] Initiales Commit
 
-### Phase 2: Azure Setup
-- [ ] Azure App Registration erstellen
-- [ ] API Permissions konfigurieren (Mail.Read, Mail.ReadBasic)
-- [ ] Client Secret generieren
-- [ ] Tenant-ID, Client-ID dokumentieren
-- [ ] Service Principal Rechte fuer alle 15 Postfaecher
+### Phase 2: Azure Setup ✅ (2026-01-12)
+- [x] Azure App Registration erstellen
+- [x] API Permissions konfigurieren (Mail.Read, Mail.ReadWrite)
+- [x] Admin Consent erteilt
+- [x] Client Secret generieren
+- [x] Tenant-ID, Client-ID dokumentieren (siehe unten)
+- [ ] Service Principal Rechte fuer alle 15 Postfaecher pruefen
 
 ### Phase 3: Datenbank-Migration
 - [ ] Migration SQL finalisieren
@@ -430,15 +431,19 @@ CREATE INDEX IF NOT EXISTS idx_documents_tracking_nummer ON documents(tracking_n
 | 2026-01-12 | PLAN.md | Diese Dokumentation erstellt |
 | 2026-01-12 | Kategorien | 22 E-Mail-Kategorien definiert |
 | 2026-01-12 | DB-Schema | Migration geplant |
+| 2026-01-12 | **Azure App Registration** | `JSFenster-Email-Integration` erstellt |
+| 2026-01-12 | **API Permissions** | Mail.Read + Mail.ReadWrite (Application) |
+| 2026-01-12 | **Admin Consent** | Fuer J.S. Fenster & Tueren erteilt |
+| 2026-01-12 | **Client Secret** | Erstellt, gueltig bis 11.07.2026 |
 
 ### Ausstehende Aufgaben
 
 | Prioritaet | Aufgabe | Abhaengigkeit |
 |------------|---------|---------------|
-| 1 | Erstes Commit | - |
-| 2 | Azure App Registration | Zugang zu Azure Portal |
-| 3 | Datenbank-Migration | Schema finalisiert |
-| 4 | email-webhook Function | Azure Setup |
+| 1 | Git Commit (Phase 1+2) | - |
+| 2 | Supabase Secrets setzen | Credentials vorhanden ✅ |
+| 3 | Datenbank-Migration anwenden | Schema vorhanden ✅ |
+| 4 | email-webhook Function | Azure Setup ✅ |
 | 5 | process-email Function | email-webhook |
 | 6 | Anhang-Pipeline | process-email |
 | 7 | Subscription Management | Alle Functions |
@@ -515,16 +520,49 @@ GET https://graph.microsoft.com/v1.0/users/{user}/messages/{message-id}/attachme
 
 ## Konfiguration
 
+### Azure App Registration
+
+> **App Name:** JSFenster-Email-Integration
+> **Erstellt:** 2026-01-12
+> **Portal:** https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/c8c7967f-467e-41ef-a485-e4931f77b604
+
+| Feld | Wert |
+|------|------|
+| **Tenant ID** | `08af0c7f-e407-4561-91f3-eb29b0d58f2e` |
+| **Client ID (Application ID)** | `c8c7967f-467e-41ef-a485-e4931f77b604` |
+| **Object ID** | `c88daf3b-0de6-4cd4-bbe1-bf0bdb755801` |
+| **Tenant Name** | J.S. Fenster & Tueren |
+| **Primary Domain** | js-fenster.de |
+
+### Client Secret
+
+| Feld | Wert |
+|------|------|
+| **Beschreibung** | Supabase-Edge-Function |
+| **Secret Value** | ⚠️ In Supabase Secrets gespeichert (AZURE_CLIENT_SECRET) |
+| **Secret ID** | `47337bee-dc0b-4f61-860a-1576db81c6de` |
+| **Gueltig bis** | **11.07.2026** |
+
+> ⚠️ **WICHTIG:** Secret vor Ablauf erneuern! Kalender-Erinnerung fuer Juni 2026.
+
+### API Permissions (Application)
+
+| Permission | Typ | Admin Consent |
+|------------|-----|---------------|
+| Mail.Read | Application | ✅ Erteilt |
+| Mail.ReadWrite | Application | ✅ Erteilt |
+| User.Read | Delegated | Nicht erforderlich |
+
 ### Supabase Secrets (zu erstellen)
 
 ```bash
 # Azure AD / Microsoft Graph
-AZURE_TENANT_ID=...
-AZURE_CLIENT_ID=...
-AZURE_CLIENT_SECRET=...
+AZURE_TENANT_ID=08af0c7f-e407-4561-91f3-eb29b0d58f2e
+AZURE_CLIENT_ID=c8c7967f-467e-41ef-a485-e4931f77b604
+AZURE_CLIENT_SECRET=<aus Azure Portal kopieren - NICHT in Git speichern!>
 
 # Webhook Validation
-EMAIL_WEBHOOK_CLIENT_STATE=... (geheim, fuer Validation)
+EMAIL_WEBHOOK_CLIENT_STATE=... (geheim, fuer Validation - noch zu generieren)
 
 # OpenAI (bereits vorhanden)
 OPENAI_API_KEY=...
@@ -580,6 +618,7 @@ Spaeter in Supabase Tabelle `email_postfaecher`:
 | Datum | Version | Aenderung | Autor |
 |-------|---------|-----------|-------|
 | 2026-01-12 | 0.1 | Initiale Projektdokumentation | Claude/Andreas |
+| 2026-01-12 | 0.2 | Azure App Registration + Credentials dokumentiert | Claude/Andreas |
 
 ---
 
