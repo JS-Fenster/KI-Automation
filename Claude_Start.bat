@@ -11,4 +11,8 @@ for /d %%D in (*) do (
 
 echo.
 echo === Claude starten ===
-claude --dangerously-skip-permissions
+:start
+claude --dangerously-skip-permissions "/init"
+echo.
+set /p restart="Claude neu starten? (j/n): "
+if /i "%restart%"=="j" goto start

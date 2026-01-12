@@ -1,7 +1,7 @@
 # E-Mail Integration - Projektdokumentation
 
 > **Projekt:** E-Mail-Kanal als Input fuer Dokumentenmanagement
-> **Status:** Phase 2 abgeschlossen (Azure Setup)
+> **Status:** Phase 4 abgeschlossen (email-webhook deployed) - Secrets setzen, Subscription erstellen
 > **Erstellt:** 2026-01-12
 > **Letzte Aktualisierung:** 2026-01-12
 
@@ -355,12 +355,12 @@ CREATE INDEX IF NOT EXISTS idx_documents_tracking_nummer ON documents(tracking_n
 
 ## Implementierungsphasen
 
-### Phase 1: Grundlagen (Aktuell)
+### Phase 1: Grundlagen ✅ (2026-01-12)
 - [x] Projektdokumentation erstellen
 - [x] Ordnerstruktur anlegen
 - [x] E-Mail-Kategorien definieren
 - [x] Datenbank-Schema planen
-- [ ] Initiales Commit
+- [x] Initiales Commit
 
 ### Phase 2: Azure Setup ✅ (2026-01-12)
 - [x] Azure App Registration erstellen
@@ -370,17 +370,19 @@ CREATE INDEX IF NOT EXISTS idx_documents_tracking_nummer ON documents(tracking_n
 - [x] Tenant-ID, Client-ID dokumentieren (siehe unten)
 - [ ] Service Principal Rechte fuer alle 15 Postfaecher pruefen
 
-### Phase 3: Datenbank-Migration
-- [ ] Migration SQL finalisieren
-- [ ] Migration auf Supabase anwenden
-- [ ] Indizes pruefen
+### Phase 3: Datenbank-Migration ✅ (2026-01-12)
+- [x] Migration SQL finalisieren
+- [x] Migration auf Supabase anwenden (001_add_email_columns.sql)
+- [x] Indizes erstellt (8 neue Indizes)
 - [ ] RLS Policies aktualisieren (falls noetig)
 
-### Phase 4: Edge Function - email-webhook
-- [ ] Webhook-Endpunkt implementieren
-- [ ] Microsoft Validation Token Handler
-- [ ] Notification Parser
-- [ ] Aufruf von process-email
+### Phase 4: Edge Function - email-webhook ✅ (2026-01-12)
+- [x] Webhook-Endpunkt implementieren
+- [x] Microsoft Validation Token Handler
+- [x] Notification Parser + E-Mail abrufen
+- [x] Speicherung in documents-Tabelle
+- [x] Deployed (v1)
+- [ ] GPT-Kategorisierung (ausgelagert nach process-email)
 
 ### Phase 5: Edge Function - process-email
 - [ ] E-Mail via Graph API abrufen
@@ -435,15 +437,17 @@ CREATE INDEX IF NOT EXISTS idx_documents_tracking_nummer ON documents(tracking_n
 | 2026-01-12 | **API Permissions** | Mail.Read + Mail.ReadWrite (Application) |
 | 2026-01-12 | **Admin Consent** | Fuer J.S. Fenster & Tueren erteilt |
 | 2026-01-12 | **Client Secret** | Erstellt, gueltig bis 11.07.2026 |
+| 2026-01-12 | **Git Commit** | Phase 1+2 committed (168313d) |
+| 2026-01-12 | **DB-Migration** | 001_add_email_columns.sql angewendet |
+| 2026-01-12 | **email-webhook** | Edge Function deployed (v1) |
+| 2026-01-12 | **Subscription Script** | manage-subscriptions.ts erstellt |
 
 ### Ausstehende Aufgaben
 
 | Prioritaet | Aufgabe | Abhaengigkeit |
 |------------|---------|---------------|
-| 1 | Git Commit (Phase 1+2) | - |
-| 2 | Supabase Secrets setzen | Credentials vorhanden ✅ |
-| 3 | Datenbank-Migration anwenden | Schema vorhanden ✅ |
-| 4 | email-webhook Function | Azure Setup ✅ |
+| 1 | **Supabase Secrets setzen** | ⚠️ Manuell im Dashboard! |
+| 2 | **Subscription erstellen** | Secrets gesetzt, dann Script ausfuehren |
 | 5 | process-email Function | email-webhook |
 | 6 | Anhang-Pipeline | process-email |
 | 7 | Subscription Management | Alle Functions |
@@ -619,6 +623,9 @@ Spaeter in Supabase Tabelle `email_postfaecher`:
 |-------|---------|-----------|-------|
 | 2026-01-12 | 0.1 | Initiale Projektdokumentation | Claude/Andreas |
 | 2026-01-12 | 0.2 | Azure App Registration + Credentials dokumentiert | Claude/Andreas |
+| 2026-01-12 | 0.3 | DB-Migration angewendet (001_add_email_columns.sql) | Claude/Andreas |
+| 2026-01-12 | 0.4 | email-webhook Edge Function deployed (v1) | Claude/Andreas |
+| 2026-01-12 | 0.4 | manage-subscriptions.ts Script erstellt | Claude/Andreas |
 
 ---
 

@@ -274,6 +274,35 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 | 2026-01-07 | Entwicklungs-Workflow | Speicherpunkte + PLAN.md Workflow fuer alle Projekte |
 | 2026-01-12 | Dokumentenmanagement produktiv | Input-Kanal abgeschlossen: Scanner→Edge Function→Supabase |
 | 2026-01-12 | email_integration | Neues Projekt: E-Mail als zweiter Input-Kanal (M365 Graph API) |
+| 2026-01-12 | Edge Function v14 | Office-Support: DOCX (JSZip+XML), XLSX (SheetJS), Magic-Byte-Erkennung |
+
+---
+
+## Dokumentenmanagement Edge Function
+
+> **Projekt:** `rsmjgdujlpnydbsfuiek` (Auftragsmanagement)
+> **Function:** `process-document` (Version 14)
+
+### Unterstuetzte Dateitypen
+
+| Typ | Methode | Kategorisierung |
+|-----|---------|-----------------|
+| PDF, PNG, JPG, etc. | Mistral OCR | GPT-5.2 |
+| DOCX | JSZip + XML-Parsing | GPT-5.2 |
+| XLSX, XLS | SheetJS | GPT-5.2 |
+| MP4, MOV, etc. | Nur speichern | "Video" |
+| DOC (alt) | Nicht unterstuetzt | "Office_Dokument" |
+
+### Features
+
+- **Duplikat-Erkennung:** SHA-256 Hash (Datei + Text)
+- **Magic-Byte-Erkennung:** Erkennt falsch benannte Dateien (z.B. .docx als .pdf)
+- **OCR-Fallback:** Bei Mistral-Fehler trotzdem speichern
+- **Kategorien:** 18 Dokumenttypen + Video, Audio, Office_Dokument, Archiv
+
+### Offene TODOs
+
+- [ ] DOC (altes Word-Format) Support
 
 <!-- KI-WISSEN-START -->
 ## KI-Wissen (Auto-generiert)
