@@ -272,6 +272,8 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 | 2025-12-27 | dokumentenmanagement | Neues Tool: PDF-Verarbeitung via Supabase Edge Function (OCR+GPT-5.2) |
 | 2025-12-27 | Scanner_Webhook | Umgestellt von n8n auf Supabase, robustere Task-Konfiguration |
 | 2026-01-07 | Entwicklungs-Workflow | Speicherpunkte + PLAN.md Workflow fuer alle Projekte |
+| 2026-01-12 | Dokumentenmanagement produktiv | Input-Kanal abgeschlossen: Scanner→Edge Function→Supabase |
+| 2026-01-12 | email_integration | Neues Projekt: E-Mail als zweiter Input-Kanal (M365 Graph API) |
 
 <!-- KI-WISSEN-START -->
 ## KI-Wissen (Auto-generiert)

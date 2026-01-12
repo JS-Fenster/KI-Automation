@@ -35,3 +35,5 @@ Thumbs.db
 _archive/
 .claude_md_backups/
 lib/config/credentials.yaml
+# Ignore Claude temp files
+tmpclaude-*

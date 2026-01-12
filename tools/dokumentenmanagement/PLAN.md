@@ -1,20 +1,29 @@
 # Dokumentenmanagement - Implementierungsplan
 
-> **Status:** Geplant
+> **Status:** Input-Kanal abgeschlossen (2026-01-12)
 > **Erstellt:** 2025-12-27
-> **Ziel:** n8n-Workflow durch eigenen Code ersetzen
+> **Ziel:** Automatische Dokumentenverarbeitung via Scanner → Supabase
+
+---
+
+## Status-Uebersicht
+
+| Phase | Status | Datum |
+|-------|--------|-------|
+| Input-Kanal (Scanner → Edge Function) | **Abgeschlossen** | 2026-01-12 |
+| Hintergrund-Tests | Laufend | - |
+| Output-Integration (ERP-Anbindung) | Offen | - |
 
 ---
 
 ## Uebersicht
 
 Automatische Verarbeitung von gescannten Dokumenten:
-1. Scanner-Ordner wird ueberwacht
-2. Neue PDFs werden via Webhook gesendet
-3. OCR-Extraktion (Mistral)
-4. KI-Kategorisierung (OpenAI GPT-5.2)
-5. Strukturierte Datenextraktion je Kategorie
-6. Speicherung in Supabase (Storage + Database)
+1. Scanner-Ordner wird ueberwacht (FileSystemWatcher)
+2. Neue PDFs werden via HTTP POST an Edge Function gesendet
+3. OCR-Extraktion (Mistral `mistral-ocr-latest`)
+4. KI-Kategorisierung + Strukturierte Extraktion (OpenAI GPT-5.2)
+5. Speicherung in Supabase (Storage Bucket `documents` + Tabelle `documents`)
 
 ---
 
@@ -23,47 +32,101 @@ Automatische Verarbeitung von gescannten Dokumenten:
 ```
 ┌──────────────────┐     ┌─────────────────────────────────────────────────┐
 │  Windows Server  │     │                   Supabase                      │
-│  (Buero)         │     │                                                 │
-│                  │     │  ┌─────────────┐  ┌──────────┐  ┌────────────┐ │
-│  Scanner-Ordner  │────▶│  │ Edge Func.  │─▶│ Storage  │  │ PostgreSQL │ │
-│  + Watcher.ps1   │ HTTP│  │ (Webhook)   │  │ (PDFs)   │  │ (Daten)    │ │
+│  (Buero / DC)    │     │           Projekt: js-fenster-erp               │
+│                  │     │           ID: rsmjgdujlpnydbsfuiek              │
+│  Scanner-Ordner  │     │  ┌─────────────┐  ┌──────────┐  ┌────────────┐ │
+│  D:\Daten\       │────▶│  │ Edge Func.  │─▶│ Storage  │  │ PostgreSQL │ │
+│  Dokumente\      │ HTTP│  │ process-    │  │ documents│  │ documents  │ │
+│  Scanner\        │ POST│  │ document    │  │ (Bucket) │  │ (Tabelle)  │ │
 │                  │     │  └──────┬──────┘  └──────────┘  └────────────┘ │
-└──────────────────┘     │         │                              ▲       │
-                         │         ▼                              │       │
+│  Watcher.ps1     │     │         │                              ▲       │
+└──────────────────┘     │         ▼                              │       │
                          │  ┌─────────────┐  ┌──────────────┐     │       │
                          │  │ Mistral API │  │ OpenAI API   │─────┘       │
-                         │  │ (OCR)       │  │ (Kategoris.) │             │
+                         │  │ (OCR)       │  │ GPT-5.2      │             │
                          │  └─────────────┘  └──────────────┘             │
                          └─────────────────────────────────────────────────┘
 ```
 
 ---
 
+## Technische Details
+
+### Supabase-Projekt
+
+| Aspekt | Wert |
+|--------|------|
+| **Projekt-Name** | js-fenster-erp |
+| **Projekt-ID** | `rsmjgdujlpnydbsfuiek` |
+| **Region** | eu-central-1 |
+| **Edge Function** | `process-document` |
+| **Storage Bucket** | `documents` |
+| **Datenbank-Tabelle** | `documents` |
+
+### Edge Function: process-document
+
+| Aspekt | Details |
+|--------|---------|
+| **URL** | `https://rsmjgdujlpnydbsfuiek.supabase.co/functions/v1/process-document` |
+| **Methode** | POST (multipart/form-data) |
+| **Input** | `file` (PDF, Bilder) |
+| **Output** | JSON mit `id`, `kategorie`, `dokument_url`, `extraktions_qualitaet` |
+
+### API-Konfiguration
+
+| Service | Model/Endpoint | Env-Variable |
+|---------|----------------|--------------|
+| Mistral | `mistral-ocr-latest` | `MISTRAL_API_KEY` |
+| OpenAI | `gpt-5.2` | `OPENAI_API_KEY` |
+| Supabase | Service Role | `SUPABASE_SERVICE_ROLE_KEY` |
+
+### Verarbeitungsablauf
+
+1. **PDF empfangen** → multipart/form-data parsen
+2. **Mistral OCR** → PDF zu Text (Markdown-Format)
+3. **GPT-5.2** → Kategorisierung + strukturierte Extraktion (JSON Schema)
+4. **Storage Upload** → `{kategorie}/{timestamp}_{filename}.pdf`
+5. **DB Insert** → 50+ Felder in `documents` Tabelle
+
+---
+
 ## Komponenten
 
-### 1. Scanner-Watcher (bereits vorhanden)
-- **Ort:** Windows Server im Buero
-- **Datei:** `tools/Scanner_Webhook/watcher.ps1` (existiert bereits)
-- **Funktion:** Ueberwacht Scanner-Ordner, sendet PDF via HTTP POST
+### 1. Scanner-Watcher (Windows Server)
 
-### 2. Supabase Edge Function (neu)
+- **Ort:** `D:\Daten\Dokumente\Scanner`
+- **Script:** `tools/Scanner_Webhook/ScannerWatcher.ps1`
+- **Scheduled Task:** `ScannerWebhookWatcher`
+- **Features:**
+  - FileSystemWatcher mit Event-Handler
+  - Datei-Lock Pruefung (max. 10 Retries)
+  - Logging in `scanner_webhook.log`
+  - Ignoriert: `.msg`, `.tmp`, kleine PNGs
+
+### 2. Edge Function (Supabase)
+
 - **Name:** `process-document`
-- **Trigger:** HTTP POST mit PDF-Datei
+- **Dateien:**
+  - `edge-function/index.ts` - Hauptlogik
+  - `edge-function/prompts.ts` - System-Prompt fuer GPT-5.2
 - **Ablauf:**
-  1. PDF empfangen
+  1. PDF empfangen + validieren
   2. Mistral OCR aufrufen → Text extrahieren
-  3. OpenAI aufrufen → Kategorie bestimmen
-  4. PDF in Storage speichern (mit Kategorie-Prefix)
-  5. OpenAI aufrufen → Strukturierte Daten extrahieren
-  6. Daten in PostgreSQL speichern
+  3. GPT-5.2 aufrufen → Kategorie + strukturierte Daten
+  4. PDF in Storage speichern
+  5. Daten in PostgreSQL speichern
 
-### 3. Supabase Storage Bucket
-- **Name:** `documents`
-- **Struktur:** `{kategorie}_{timestamp}.pdf`
+### 3. Supabase Storage
 
-### 4. Supabase Datenbank-Tabellen
-- **Haupttabelle:** `dokumente`
-- **Optionale Untertabellen:** Pro Kategorie (fuer normalisierte Daten)
+- **Bucket:** `documents`
+- **Struktur:** `{kategorie}/{timestamp}_{original_filename}.pdf`
+- **Beispiel:** `Eingangsrechnung/2026-01-12T10-30-45-123Z_scan001.pdf`
+
+### 4. Supabase Datenbank
+
+- **Tabelle:** `documents`
+- **Felder:** 50+ Spalten (siehe Schema unten)
+- **Indizes:** kategorie, dokument_datum, aussteller_firma, status
 
 ---
 
@@ -94,147 +157,194 @@ Automatische Verarbeitung von gescannten Dokumenten:
 
 ## Datenbank-Schema
 
-### Tabelle: `dokumente`
+### Tabelle: `documents`
 
 ```sql
-CREATE TABLE dokumente (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
+-- Haupt-Metadaten
+id UUID PRIMARY KEY
+created_at TIMESTAMPTZ
+kategorie TEXT NOT NULL
+dokument_url TEXT NOT NULL
+ocr_text TEXT
+extraktions_zeitstempel TIMESTAMPTZ
+extraktions_qualitaet TEXT  -- hoch/mittel/niedrig
+extraktions_hinweise JSONB
 
-  -- Dokument-Metadaten
-  kategorie TEXT NOT NULL,
-  dokument_url TEXT NOT NULL,
-  ocr_text TEXT,
+-- Dokument-Basis
+dokument_datum DATE
+dokument_nummer TEXT
+dokument_richtung TEXT  -- eingehend/ausgehend
 
-  -- Extraktionsqualitaet
-  extraktions_qualitaet TEXT, -- hoch/mittel/niedrig
-  extraktions_hinweise JSONB,
+-- Aussteller (wer hat erstellt)
+aussteller_firma TEXT
+aussteller_name TEXT
+aussteller_strasse TEXT
+aussteller_plz TEXT
+aussteller_ort TEXT
+aussteller_telefon TEXT
+aussteller_email TEXT
+aussteller_ust_id TEXT
 
-  -- Extrahierte Daten (JSONB fuer Flexibilitaet)
-  daten JSONB NOT NULL,
+-- Empfaenger
+empfaenger_firma TEXT
+empfaenger_vorname TEXT
+empfaenger_nachname TEXT
+empfaenger_strasse TEXT
+empfaenger_plz TEXT
+empfaenger_ort TEXT
+empfaenger_telefon TEXT
+empfaenger_email TEXT
+empfaenger_kundennummer TEXT
 
-  -- Referenzen (fuer schnelle Suche)
-  dokument_datum DATE,
-  dokument_nummer TEXT,
-  firma_name TEXT,
-  betrag_brutto NUMERIC(12,2),
+-- Betraege
+summe_netto NUMERIC
+mwst_betrag NUMERIC
+summe_brutto NUMERIC
+offener_betrag NUMERIC
 
-  -- Verarbeitung
-  verarbeitet_am TIMESTAMPTZ DEFAULT NOW(),
-  status TEXT DEFAULT 'neu' -- neu/geprueft/archiviert
-);
+-- Positionen (als JSONB Array)
+positionen JSONB
 
--- Indizes fuer haeufige Abfragen
-CREATE INDEX idx_dokumente_kategorie ON dokumente(kategorie);
-CREATE INDEX idx_dokumente_datum ON dokumente(dokument_datum);
-CREATE INDEX idx_dokumente_firma ON dokumente(firma_name);
-CREATE INDEX idx_dokumente_status ON dokumente(status);
+-- Zahlungsbedingungen
+zahlungsziel_tage INTEGER
+faellig_am DATE
+skonto_prozent NUMERIC
+skonto_tage INTEGER
+
+-- Bankverbindung
+bank_name TEXT
+bank_iban TEXT
+bank_bic TEXT
+
+-- Lieferung
+liefertermin_datum DATE
+lieferzeit_wochen INTEGER
+
+-- Bezuege zu anderen Dokumenten
+bezug_angebot_nr TEXT
+bezug_bestellung_nr TEXT
+bezug_lieferschein_nr TEXT
+bezug_rechnung_nr TEXT
+bezug_auftrag_nr TEXT
+bezug_projekt TEXT
+
+-- Mahnung-spezifisch
+mahnung_stufe INTEGER
+mahngebuehren NUMERIC
+verzugszinsen_betrag NUMERIC
+gesamtforderung NUMERIC
+
+-- Korrespondenz
+betreff TEXT
+inhalt_zusammenfassung TEXT
+bemerkungen TEXT
+dringlichkeit TEXT  -- hoch/mittel/niedrig
 ```
-
----
-
-## API Keys
-
-Gespeichert in: `lib/config/credentials.yaml`
-
-| Service | Key-Name | Status |
-|---------|----------|--------|
-| Mistral | `mistral.api_key` | Eingetragen |
-| OpenAI | `openai.api_key` | Eingetragen |
-| Supabase | Via MCP | Verbunden |
 
 ---
 
 ## Implementierungsschritte
 
-### Phase 1: Grundstruktur
-- [ ] Supabase Storage Bucket `documents` erstellen
-- [ ] Datenbank-Tabelle `dokumente` erstellen
-- [ ] Edge Function Grundgeruest erstellen
+### Phase 1: Grundstruktur ✅
+- [x] Supabase Storage Bucket `documents` erstellen
+- [x] Datenbank-Tabelle `documents` erstellen
+- [x] Edge Function Grundgeruest erstellen
 
-### Phase 2: OCR-Integration
-- [ ] Mistral API-Aufruf implementieren
-- [ ] PDF zu Text Konvertierung testen
+### Phase 2: OCR-Integration ✅
+- [x] Mistral API-Aufruf implementieren
+- [x] PDF zu Text Konvertierung (Base64 → OCR)
 
-### Phase 3: Kategorisierung
-- [ ] OpenAI-Aufruf fuer Kategorisierung
-- [ ] System-Prompt aus n8n uebernehmen
-- [ ] Kategorisierung testen
+### Phase 3: Kategorisierung ✅
+- [x] OpenAI-Aufruf fuer Kategorisierung + Extraktion
+- [x] System-Prompt mit allen 18 Kategorien
+- [x] JSON Schema fuer strukturierten Output
 
-### Phase 4: Datenextraktion
-- [ ] OpenAI-Aufruf fuer strukturierte Extraktion
-- [ ] Alle 18 Kategorie-Prompts uebernehmen
-- [ ] JSON-Validierung implementieren
+### Phase 4: Datenextraktion ✅
+- [x] GPT-5.2 Structured Output (strict mode)
+- [x] Alle Felder im Schema definiert
+- [x] Qualitaetsbewertung implementiert
 
-### Phase 5: Speicherung
-- [ ] PDF in Storage speichern
-- [ ] Extrahierte Daten in DB speichern
-- [ ] Error-Handling implementieren
+### Phase 5: Speicherung ✅
+- [x] PDF in Storage speichern (mit Kategorie-Prefix)
+- [x] Extrahierte Daten in DB speichern
+- [x] Error-Handling implementiert
 
-### Phase 6: Integration
-- [ ] Scanner-Watcher auf neue Edge Function umstellen
-- [ ] End-to-End Test
-- [ ] n8n-Workflow deaktivieren
+### Phase 6: Integration ✅
+- [x] Scanner-Watcher auf Edge Function umgestellt
+- [x] Webhook-URL in ScannerWatcher.ps1 konfiguriert
+- [x] n8n-Workflow deaktiviert/ersetzt
+
+### Phase 7: Testing (Laufend)
+- [ ] End-to-End Tests mit verschiedenen Dokumenttypen
+- [ ] Fehlerszenarien pruefen (OCR-Fehler, API-Limits)
+- [ ] Performance-Monitoring
+
+### Phase 8: Output-Integration (Offen)
+- [ ] ERP-System Anbindung (Dokumente anzeigen)
+- [ ] Such- und Filterfunktionen
+- [ ] Benachrichtigungen bei kritischen Dokumenten (Mahnung, Finanzamt)
 
 ---
 
-## Prompts (aus n8n-Workflow)
+## Dateien in diesem Ordner
 
-### Kategorisierungs-Prompt
+| Datei | Beschreibung |
+|-------|--------------|
+| `PLAN.md` | Diese Datei - Uebersicht und Status |
+| `edge-function/index.ts` | Edge Function Hauptlogik |
+| `edge-function/prompts.ts` | System-Prompt fuer GPT-5.2 |
+| `n8n_workflow.txt` | Alter n8n Workflow (Referenz, deaktiviert) |
+| `test-upload.ps1` | Test-Script fuer manuellen Upload |
+
+---
+
+## Offene Punkte / Bekannte Einschraenkungen
+
+1. **Keine JWT-Validierung:** Edge Function ist oeffentlich erreichbar (verify_jwt: false)
+   - Akzeptabel da nur interner Server zugreift
+   - Bei Bedarf: API-Key Header hinzufuegen
+
+2. **Fehlerbehandlung:** Bei OCR/API-Fehlern wird HTTP 500 zurueckgegeben
+   - Watcher loggt Fehler, aber keine Retry-Logik
+
+3. **Duplikat-Erkennung:** Nicht implementiert
+   - Gleiche Datei kann mehrfach verarbeitet werden
+   - Watcher hat `processed_files.txt` als einfache Pruefung
+
+4. **Benachrichtigungen:** Noch nicht implementiert
+   - Geplant: Alert bei Mahnung, Finanzamt-Post
+
+---
+
+## Schnellreferenz: Wichtige URLs/Pfade
 
 ```
-Du bist ein Extrahierungs- und Benennungsassistent fuer eingehende
-Dokumente der Firma J.S. Fenster Tueren.
+# Edge Function URL
+https://rsmjgdujlpnydbsfuiek.supabase.co/functions/v1/process-document
 
-Du vergibst fuer jedes Dokument eine Kategorie:
-- Preisanfrage
-- Angebot
-- Auftragsbestaetigung
-- Bestellung
-- Eingangslieferschein
-- Eingangsrechnung
-- Kundenlieferschein
-- Montageauftrag
-- Ausgangsrechnung
-- Zahlungserinnerung
-- Mahnung
-- Notiz
-- Skizze
-- Brief_an_Kunde
-- Brief_von_Kunde
-- Brief_von_Finanzamt
-- Brief_von_Amt
-- Sonstiges_Dokument
+# Scanner-Ordner (Server)
+D:\Daten\Dokumente\Scanner
 
-Du antwortest NUR mit der Kategorie und gibst nichts anderes zurueck.
+# Supabase Dashboard
+https://supabase.com/dashboard/project/rsmjgdujlpnydbsfuiek
+
+# Edge Function Logs
+Supabase Dashboard → Edge Functions → process-document → Logs
+
+# Watcher Logs (auf Server)
+C:\Scripts\Scanner_Webhook\scanner_webhook.log
 ```
 
-### Extraktions-Prompt
+---
 
-Der vollstaendige Extraktions-Prompt mit allen 18 Kategorie-Regeln
-befindet sich in: `dokumentenmanagement/n8n_workflow.txt`
+## Historie
 
-Zeilen 130-133 enthalten den User-Prompt.
-Zeilen 74+ (systemMessage) enthalten alle Extraktionsregeln.
+| Datum | Aenderung |
+|-------|-----------|
+| 2025-12-27 | Plan erstellt, n8n-Workflow analysiert |
+| 2025-12-27 | Edge Function Grundstruktur implementiert |
+| 2026-01-12 | **Input-Kanal abgeschlossen:** Scanner → Edge Function Pipeline produktiv |
 
 ---
 
-## Offene Fragen
-
-1. **Supabase-Projekt:** Welches Projekt verwenden? (erp-system-vite?)
-2. **Fehlerbehandlung:** Was passiert bei OCR-Fehlern?
-3. **Benachrichtigung:** Soll bei bestimmten Kategorien (Mahnung, Finanzamt) alarmiert werden?
-4. **Duplikat-Erkennung:** Sollen bereits verarbeitete Dokumente erkannt werden?
-
----
-
-## Naechste Schritte
-
-1. Storage Bucket in Supabase erstellen
-2. Datenbank-Tabelle anlegen
-3. Edge Function `process-document` implementieren
-4. Testen mit einem Beispiel-PDF
-
----
-
-*Zuletzt aktualisiert: 2025-12-27*
+*Zuletzt aktualisiert: 2026-01-12*
