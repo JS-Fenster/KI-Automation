@@ -48,9 +48,11 @@
 
 ## Dateiablage (Netzlaufwerke)
 
+> Hinweis: Nur im Firmennetz erreichbar (work-only).
+
 | Laufwerk/Pfad | Server | Inhalt |
 |---------------|--------|--------|
-| `Z:\` | DC | Hauptnetzlaufwerk, zentrale Dateiablage |
+| Netzlaufwerk (gemappt) | DC | Hauptnetzlaufwerk, zentrale Dateiablage |
 | `\\appserver\Work4all\` | AppServer | Work4all ERP-Dateien |
 | `\\appserver\Work4all\B001` | AppServer | Dokumente (Bilder, Montagescheine, etc.) |
 | `\\appserver\Work4all\T001` | AppServer | Ticket-Anhaenge |

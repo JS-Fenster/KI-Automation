@@ -1,9 +1,27 @@
 // =============================================================================
 // E-Mail Webhook - Microsoft Graph Change Notifications
-// Erstellt: 2026-01-12
+// Version: 3.1 - 2026-01-13
 // =============================================================================
 // Empfaengt Notifications von Microsoft Graph wenn neue E-Mails ankommen
 // oder E-Mails gesendet werden.
+//
+// Aenderungen v3.2:
+// - ImmutableId Header fuer stabile IDs bei Ordner-Verschiebungen
+//
+// Aenderungen v3.1:
+// - Subscription-Validierung gegen email_subscriptions Tabelle
+// - Unbekannte subscriptionIds werden abgelehnt
+//
+// Aenderungen v3.0:
+// - Composite Unique Constraint (email_postfach, email_message_id)
+// - Processing-Status Logic (pending->queued->processing->done/error)
+// - Nur process-email triggern wenn status != done
+//
+// Aenderungen v2.0:
+// - ValidationToken Handling verbessert (Change 1)
+// - Security: clientState + x-webhook-secret Header (Change 2)
+// - Background Processing fuer schnelle Antwort (Change 3)
+// - Upsert statt Insert fuer Idempotenz (Change 4)
 // =============================================================================
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
@@ -33,6 +51,7 @@ const AZURE_TENANT_ID = Deno.env.get("AZURE_TENANT_ID");
 const AZURE_CLIENT_ID = Deno.env.get("AZURE_CLIENT_ID");
 const AZURE_CLIENT_SECRET = Deno.env.get("AZURE_CLIENT_SECRET");
 const EMAIL_WEBHOOK_CLIENT_STATE = Deno.env.get("EMAIL_WEBHOOK_CLIENT_STATE") || "js-fenster-email-webhook-secret";
+const EMAIL_WEBHOOK_SECRET = Deno.env.get("EMAIL_WEBHOOK_SECRET"); // Optional additional header secret
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -143,6 +162,8 @@ async function fetchEmailDetails(
     headers: {
       Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
+      // v3.2: Request ImmutableId for stable IDs across folder moves
+      Prefer: 'IdType="ImmutableId"',
     },
   });
 
@@ -254,33 +275,186 @@ async function saveEmailToDatabase(
 
     // Will be filled by GPT categorization later
     inhalt_zusammenfassung: email.bodyPreview?.substring(0, 500),
+
+    // Processing status (v3.0)
+    processing_status: "queued",
+    processing_attempts: 0,
   };
 
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/documents`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      apikey: SUPABASE_SERVICE_ROLE_KEY,
-      "Content-Type": "application/json",
-      Prefer: "return=representation",
-    },
-    body: JSON.stringify(documentData),
-  });
+  // Use UPSERT with composite unique constraint (v3.0)
+  // ON CONFLICT on (email_postfach, email_message_id)
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/documents?on_conflict=email_postfach,email_message_id`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        "Content-Type": "application/json",
+        Prefer: "return=representation,resolution=merge-duplicates",
+      },
+      body: JSON.stringify(documentData),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.text();
-
-    // Check for duplicate (unique constraint violation)
-    if (error.includes("unique_email_message_id") || error.includes("duplicate")) {
-      console.log(`Email already processed: ${email.id}`);
-      return null;
-    }
-
     throw new Error(`Failed to save email: ${error}`);
   }
 
   const result = await response.json();
-  return { id: result[0]?.id };
+  const doc = result[0];
+  const wasInserted = doc?.created_at === doc?.updated_at;
+  const shouldProcess = doc?.processing_status !== "done";
+
+  console.log(`Email ${wasInserted ? "inserted" : "updated"}: ${email.id} (process: ${shouldProcess})`);
+  return { id: doc?.id, wasInserted, shouldProcess };
+}
+
+// =============================================================================
+// Background Processing Helper (Change 3)
+// =============================================================================
+
+async function processNotificationInBackground(
+  notification: ChangeNotification
+): Promise<void> {
+  try {
+    // Get access token
+    const accessToken = await getAccessToken();
+
+    // Extract metadata from resource path
+    const postfach = extractUserFromResource(notification.resource);
+    const richtung = extractFolderFromResource(notification.resource);
+
+    console.log(`[BG] Processing email for ${postfach} (${richtung})`);
+
+    // Fetch full email details
+    const email = await fetchEmailDetails(notification.resource, accessToken);
+
+    // Save to database (upsert)
+    const result = await saveEmailToDatabase(email, postfach, richtung);
+
+    if (result) {
+      console.log(`[BG] Email saved with ID: ${result.id}`);
+
+      // Only trigger process-email if not already done (v3.0 idempotency)
+      if (result.shouldProcess && SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+        try {
+          const processUrl = `${SUPABASE_URL}/functions/v1/process-email`;
+          const processResponse = await fetch(processUrl, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              document_id: result.id,
+              email_message_id: email.id,
+              postfach: postfach,
+            }),
+          });
+
+          if (processResponse.ok) {
+            console.log(`[BG] Triggered process-email for ${result.id}`);
+          } else {
+            console.warn(`[BG] process-email returned ${processResponse.status}`);
+          }
+        } catch (processError) {
+          // Non-fatal: process-email might not be deployed yet
+          console.log(`[BG] process-email not available: ${processError}`);
+        }
+      } else if (!result.shouldProcess) {
+        console.log(`[BG] Email already processed - skipping process-email`);
+      }
+    }
+  } catch (error) {
+    console.error(`[BG] Error processing notification: ${error}`);
+  }
+}
+
+// =============================================================================
+// Security Validation (Change 2 + v3.1 DB validation)
+// =============================================================================
+
+// Cache for validated subscription IDs (to avoid repeated DB calls)
+const validatedSubscriptions = new Set<string>();
+
+async function isKnownSubscription(subscriptionId: string): Promise<boolean> {
+  // Check cache first
+  if (validatedSubscriptions.has(subscriptionId)) {
+    return true;
+  }
+
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    // If DB not configured, skip this check (backwards compatibility)
+    console.warn("[SEC] DB not configured - skipping subscription validation");
+    return true;
+  }
+
+  try {
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/email_subscriptions?subscription_id=eq.${subscriptionId}&is_active=eq.true&select=subscription_id`,
+      {
+        headers: {
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error(`[SEC] Failed to query subscriptions: ${response.status}`);
+      // On error, allow (fail open for availability)
+      return true;
+    }
+
+    const results = await response.json();
+    const isKnown = results.length > 0;
+
+    if (isKnown) {
+      // Cache the valid subscription
+      validatedSubscriptions.add(subscriptionId);
+    }
+
+    return isKnown;
+  } catch (error) {
+    console.error(`[SEC] Subscription validation error: ${error}`);
+    // On error, allow (fail open for availability)
+    return true;
+  }
+}
+
+async function validateRequest(
+  req: Request,
+  notification?: ChangeNotification
+): Promise<boolean> {
+  // Check x-webhook-secret header if configured
+  if (EMAIL_WEBHOOK_SECRET) {
+    const headerSecret = req.headers.get("x-webhook-secret");
+    if (headerSecret !== EMAIL_WEBHOOK_SECRET) {
+      console.warn("[SEC] Invalid x-webhook-secret header");
+      return false;
+    }
+  }
+
+  // Check clientState in notification payload (Microsoft Graph sends this)
+  if (notification && notification.clientState) {
+    if (notification.clientState !== EMAIL_WEBHOOK_CLIENT_STATE) {
+      console.warn(`[SEC] Invalid clientState: ${notification.clientState}`);
+      return false;
+    }
+  }
+
+  // v3.1: Check subscriptionId against email_subscriptions table
+  if (notification && notification.subscriptionId) {
+    const isKnown = await isKnownSubscription(notification.subscriptionId);
+    if (!isKnown) {
+      console.warn(`[SEC] Unknown subscriptionId: ${notification.subscriptionId}`);
+      return false;
+    }
+  }
+
+  return true;
 }
 
 // =============================================================================
@@ -291,21 +465,19 @@ Deno.serve(async (req: Request) => {
   const url = new URL(req.url);
 
   // ==========================================================================
-  // Microsoft Graph Subscription Validation
+  // Microsoft Graph Subscription Validation (Change 1)
   // ==========================================================================
   // When creating a subscription, Microsoft sends a GET request with
-  // validationToken that must be echoed back
+  // validationToken query parameter. We MUST echo it back as plain text.
 
-  if (req.method === "GET") {
-    const validationToken = url.searchParams.get("validationToken");
-
-    if (validationToken) {
-      console.log("Subscription validation request received");
-      return new Response(validationToken, {
-        status: 200,
-        headers: { "Content-Type": "text/plain" },
-      });
-    }
+  const validationToken = url.searchParams.get("validationToken");
+  if (validationToken) {
+    // This can come via GET or POST - handle both
+    console.log("Subscription validation request received");
+    return new Response(validationToken, {
+      status: 200,
+      headers: { "Content-Type": "text/plain" },
+    });
   }
 
   // ==========================================================================
@@ -315,13 +487,18 @@ Deno.serve(async (req: Request) => {
   if (req.method === "POST") {
     try {
       const payload: NotificationPayload = await req.json();
+      const notificationCount = payload.value?.length || 0;
 
-      console.log(`Received ${payload.value?.length || 0} notifications`);
+      console.log(`Received ${notificationCount} notifications`);
 
-      // Validate clientState for security
+      // Return 202 IMMEDIATELY, process in background (Change 3)
+      // This prevents Microsoft Graph from timing out and retrying
+      const validNotifications: ChangeNotification[] = [];
+
       for (const notification of payload.value || []) {
-        if (notification.clientState && notification.clientState !== EMAIL_WEBHOOK_CLIENT_STATE) {
-          console.warn("Invalid clientState - potential security issue");
+        // Security check (Change 2 + v3.1)
+        if (!(await validateRequest(req, notification))) {
+          console.warn("Security validation failed - skipping notification");
           continue;
         }
 
@@ -331,61 +508,64 @@ Deno.serve(async (req: Request) => {
           continue;
         }
 
-        try {
-          // Get access token
-          const accessToken = await getAccessToken();
+        validNotifications.push(notification);
+      }
 
-          // Extract metadata from resource path
-          const postfach = extractUserFromResource(notification.resource);
-          const richtung = extractFolderFromResource(notification.resource);
+      // Schedule background processing for all valid notifications
+      // Using EdgeRuntime.waitUntil to keep function alive after response
+      if (validNotifications.length > 0) {
+        const backgroundPromise = Promise.all(
+          validNotifications.map((n) => processNotificationInBackground(n))
+        );
 
-          console.log(`Processing email for ${postfach} (${richtung})`);
-
-          // Fetch full email details
-          const email = await fetchEmailDetails(notification.resource, accessToken);
-
-          // Save to database
-          const result = await saveEmailToDatabase(email, postfach, richtung);
-
-          if (result) {
-            console.log(`Email saved with ID: ${result.id}`);
-
-            // TODO: Trigger GPT categorization (process-email function)
-            // TODO: Process attachments if any
-          }
-        } catch (error) {
-          console.error(`Error processing notification: ${error}`);
-          // Continue with next notification
+        // @ts-ignore - EdgeRuntime.waitUntil is available in Supabase Edge Functions
+        if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) {
+          EdgeRuntime.waitUntil(backgroundPromise);
+        } else {
+          // Fallback: await directly (will delay response but works)
+          await backgroundPromise;
         }
       }
 
       // Always return 202 Accepted to Microsoft
-      // Even if processing fails, we don't want Microsoft to retry
-      return new Response(JSON.stringify({ status: "accepted" }), {
-        status: 202,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          status: "accepted",
+          received: notificationCount,
+          processing: validNotifications.length,
+        }),
+        {
+          status: 202,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     } catch (error) {
       console.error(`Webhook error: ${error}`);
-      return new Response(JSON.stringify({ error: String(error) }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
+      // Still return 202 to prevent Microsoft from retrying
+      return new Response(
+        JSON.stringify({ status: "accepted", error: String(error) }),
+        {
+          status: 202,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
   }
 
   // ==========================================================================
-  // Health Check / Info
+  // Health Check / Info (GET without validationToken)
   // ==========================================================================
 
   return new Response(
     JSON.stringify({
       service: "email-webhook",
-      version: "1.0.0",
+      version: "3.2.0",
       status: "ready",
       configured: {
         azure: !!(AZURE_TENANT_ID && AZURE_CLIENT_ID && AZURE_CLIENT_SECRET),
         supabase: !!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY),
+        webhookSecret: !!EMAIL_WEBHOOK_SECRET,
+        subscriptionValidation: !!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY),
       },
     }),
     {

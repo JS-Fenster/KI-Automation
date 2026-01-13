@@ -258,7 +258,7 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 |-------|-----------|---------|
 | 2025-12-12 | Repo-Aufteilung | KI_Automation, JS_Prozesse, Auftragsmanagement getrennt |
 | 2025-12-12 | IDEEN verschoben | IDEEN*.* jetzt in `JS_Prozesse/` |
-| 2025-12-12 | Hub-Struktur | Alle Repos jetzt unter `Z:/IT-Sammlung/KI_Automation_Hub/` |
+| 2025-12-12 | Hub-Struktur | Alle Repos jetzt unter KI_Automation_Hub/ (work-only: Netzlaufwerk) |
 | 2025-12-12 | Analysen verschoben | `*_Analyse.md` jetzt in `JS_Prozesse/analysen/` |
 | 2025-12-12 | Projektplan verschoben | Nach `Auftragsmanagement/docs/` |
 | 2025-12-12 | ki_wissen_updater.py | IDEEN_FILE Pfad auf JS_Prozesse angepasst |

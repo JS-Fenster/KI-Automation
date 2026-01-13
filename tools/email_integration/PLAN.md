@@ -1,9 +1,9 @@
 # E-Mail Integration - Projektdokumentation
 
 > **Projekt:** E-Mail-Kanal als Input fuer Dokumentenmanagement
-> **Status:** Phase 4 abgeschlossen (email-webhook deployed) - Secrets setzen, Subscription erstellen
+> **Status:** Phase 5 abgeschlossen - Hardening + Betrieb bereit
 > **Erstellt:** 2026-01-12
-> **Letzte Aktualisierung:** 2026-01-12
+> **Letzte Aktualisierung:** 2026-01-13
 
 ---
 
@@ -384,12 +384,13 @@ CREATE INDEX IF NOT EXISTS idx_documents_tracking_nummer ON documents(tracking_n
 - [x] Deployed (v1)
 - [ ] GPT-Kategorisierung (ausgelagert nach process-email)
 
-### Phase 5: Edge Function - process-email
-- [ ] E-Mail via Graph API abrufen
-- [ ] GPT-5.2 Kategorisierungs-Prompt
-- [ ] GPT-5.2 Extraktions-Prompt (je Kategorie)
-- [ ] Speicherung in documents-Tabelle
-- [ ] E-Mail-Body in Storage speichern (optional)
+### Phase 5: Edge Function - process-email ✅ (2026-01-13)
+- [x] E-Mail via Graph API abrufen
+- [x] GPT-5.2 Kategorisierungs-Prompt
+- [x] Speicherung in documents-Tabelle
+- [x] Processing-Status Management (queued→processing→done/error)
+- [x] Attachment Hardening (25MB Limit, Inline-Skip, SHA-256 Hash)
+- [x] Deployed (v2.0)
 
 ### Phase 6: Anhang-Verarbeitung
 - [ ] Anhaenge aus E-Mail extrahieren
@@ -626,6 +627,12 @@ Spaeter in Supabase Tabelle `email_postfaecher`:
 | 2026-01-12 | 0.3 | DB-Migration angewendet (001_add_email_columns.sql) | Claude/Andreas |
 | 2026-01-12 | 0.4 | email-webhook Edge Function deployed (v1) | Claude/Andreas |
 | 2026-01-12 | 0.4 | manage-subscriptions.ts Script erstellt | Claude/Andreas |
+| 2026-01-13 | 0.5 | **Hardening + Betrieb** | Claude/Andreas |
+| | | - DB: Composite UNIQUE (postfach, message_id) + Analytics Indexes | |
+| | | - DB: Processing-Status Felder (queued/processing/done/error) | |
+| | | - email-webhook v3.0: Idempotenz + shouldProcess Logic | |
+| | | - process-email v2.0: Attachment Hardening (25MB, Inline-Skip, SHA-256) | |
+| | | - E2E Test Playbook erstellt | |
 
 ---
 

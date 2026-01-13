@@ -1,0 +1,4 @@
+# Secrets - NIEMALS committen!
+.env
+*.env
+.env.*
