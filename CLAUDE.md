@@ -51,10 +51,10 @@ KI_Automation/
 | Datei | Inhalt | Update |
 |-------|--------|--------|
 | `docs/ERP_Datenbank.md` | SQL Server Schema, Spalten-Korrekturen, Tunnel | Manuell bei DB-Erkenntnissen |
-| `docs/KI_Wissen.md` | KI/Automation-News und Tools | Automatisch woechentlich |
+| `docs/KI_Wissen.md` | REDIRECT → [KB/REFERENCE/KI_Wissen.md](https://github.com/JS-Fenster/KB/blob/master/REFERENCE/KI_Wissen.md) | Canonical in KB |
 | `docs/Server_Infrastruktur.md` | Hyper-V Host, VMs, Netzwerk | Manuell bei Infrastruktur-Aenderungen |
 
-**KI_Wissen.md Schreibregeln:**
+**KI_Wissen.md Schreibregeln (gelten fuer KB-Version):**
 - Verdichtet & praegnant - Nur Kern-Infos
 - Token-effizient - Minimal formulieren
 - Use-Cases nennen - "Tool X fuer Y nuetzlich"
@@ -305,11 +305,11 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 - [ ] DOC (altes Word-Format) Support
 
 <!-- KI-WISSEN-START -->
-## KI-Wissen (Auto-generiert)
+## KI-Wissen (Canonical in KB)
 
-> **Aktualisiert:** 2026-01-05 17:09
+> **Canonical:** [KB/REFERENCE/KI_Wissen.md](../../../KB/REFERENCE/KI_Wissen.md) (work-only)
 >
-> **IMMER einlesen:** `../../docs/KI_Wissen.md`
+> **GitHub:** [KB/REFERENCE/KI_Wissen.md](https://github.com/JS-Fenster/KB/blob/master/REFERENCE/KI_Wissen.md)
 >
 > Enthält aktuelle KI/Automation-News und Tools. Wird wöchentlich automatisch aktualisiert.
 <!-- KI-WISSEN-END -->
