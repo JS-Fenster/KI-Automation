@@ -201,5 +201,6 @@ relevant_topics:
 - power automate
 paths:
   # Relative Pfade (vom Script-Ordner aus)
-  knowledge_db: ../../docs/KI_Wissen.md
+  # tools/KI_Wissen -> tools -> KI_Automation -> repos -> WORK -> Claude_Workspace -> KB
+  knowledge_db: ../../../../../KB/REFERENCE/KI_Wissen.md
   update_log: ./update_log.json

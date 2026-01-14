@@ -5,21 +5,9 @@
 
 ---
 
-## Allgemeine Anforderungen an Claude
+## Globale Regeln
 
-| Bereich | Anforderung |
-|---------|-------------|
-| **Name** | Andreas Stolarczyk |
-| **Ansprache** | Mit Vornamen (Andreas) |
-| **Sprache** | Deutsch (Konversation), Englisch (Code) |
-| **Code-Standard** | ASCII-only in Code, Variablen/Funktionen auf Englisch, Kommentare auf Englisch |
-| **Umlaute (ä/ö/ü/ß)** | ✅ In UI-Texten (String-Literale fuer Labels, Buttons, Dialoge, Fehlermeldungen) |
-| | ❌ In Code-Konstrukten (Variablen, Funktionen, Kommentare, Docstrings) → ae/oe/ue/ss |
-| **Entscheidungen** | Selbststaendig treffen wenn moeglich |
-| **Rueckfragen** | Bei Unklarheiten immer nachfragen |
-| **Dokumentation** | Dateien synchron halten, Redundanzen vermeiden |
-| **Kontext** | Verdichten, kompakt halten - Kontext sparen |
-| **Background Tasks** | Minimal halten, sofort killen wenn fertig |
+> Siehe `BOOTSTRAP/CLAUDE.md` und `KB/STANDARDS/code_standards.md`
 
 ---
 
@@ -182,7 +170,7 @@ Wenn ein Projekt eine `PLAN.md` Datei hat:
 
 ## Automatische Updates
 
-Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
+Die `KB/REFERENCE/KI_Wissen.md` wird woechentlich aktualisiert via:
 - Windows Task Scheduler (Sonntags 03:00)
 - Manuell: `python tools/KI_Wissen/ki_wissen_updater.py --force`
 
@@ -208,7 +196,7 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 4. Unbekanntes Repo gefunden? → User fragen, dann Tabelle + Changelog aktualisieren
 
 **Self-Check (neue Claude-Version):**
-1. Header aus `docs/KI_Wissen.md` lesen
+1. Header aus `KB/REFERENCE/KI_Wissen.md` lesen
 2. `Claude-Version` vergleichen
 3. Wenn unterschiedlich: Bekanntes entfernen, Header aktualisieren
 
@@ -250,33 +238,6 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 
 ---
 
-## Changelog (Struktur-Aenderungen)
-
-> **WICHTIG:** Bei relevanten Aenderungen an der Repo-Struktur hier dokumentieren!
-
-| Datum | Aenderung | Details |
-|-------|-----------|---------|
-| 2025-12-12 | Repo-Aufteilung | KI_Automation, JS_Prozesse, Auftragsmanagement getrennt |
-| 2025-12-12 | IDEEN verschoben | IDEEN*.* jetzt in `JS_Prozesse/` |
-| 2025-12-12 | Hub-Struktur | Alle Repos jetzt unter KI_Automation_Hub/ (work-only: Netzlaufwerk) |
-| 2025-12-12 | Analysen verschoben | `*_Analyse.md` jetzt in `JS_Prozesse/analysen/` |
-| 2025-12-12 | Projektplan verschoben | Nach `Auftragsmanagement/docs/` |
-| 2025-12-12 | ki_wissen_updater.py | IDEEN_FILE Pfad auf JS_Prozesse angepasst |
-| 2025-12-13 | Allgemeine Anforderungen | +Name, +Background Tasks |
-| 2025-12-13 | Session-Regeln | +Nach Code-Aenderungen, +Nach Session-Ende |
-| 2025-12-19 | Server_Infrastruktur.md | Neue Wissensdatenbank fuer Hyper-V, VMs, Netzwerk |
-| 2025-12-19 | Rechner-Erkennung | +JS-FENSTER, +PC003 (Arbeit) |
-| 2025-12-19 | Struktur bereinigt | SQL-Details nach ERP_Datenbank.md verschoben, Dopplungen entfernt |
-| 2025-12-20 | Scanner_Webhook | Von n8n_Installation/ nach tools/ verschoben, n8n_Installation/ geloescht |
-| 2025-12-22 | erp-system-vite | Neues Repo: ERP Frontend (Vite + React + Supabase) |
-| 2025-12-27 | dokumentenmanagement | Neues Tool: PDF-Verarbeitung via Supabase Edge Function (OCR+GPT-5.2) |
-| 2025-12-27 | Scanner_Webhook | Umgestellt von n8n auf Supabase, robustere Task-Konfiguration |
-| 2026-01-07 | Entwicklungs-Workflow | Speicherpunkte + PLAN.md Workflow fuer alle Projekte |
-| 2026-01-12 | Dokumentenmanagement produktiv | Input-Kanal abgeschlossen: Scanner→Edge Function→Supabase |
-| 2026-01-12 | email_integration | Neues Projekt: E-Mail als zweiter Input-Kanal (M365 Graph API) |
-| 2026-01-12 | Edge Function v14 | Office-Support: DOCX (JSZip+XML), XLSX (SheetJS), Magic-Byte-Erkennung |
-
----
 
 ## Dokumentenmanagement Edge Function
 
@@ -305,11 +266,11 @@ Die `docs/KI_Wissen.md` wird woechentlich aktualisiert via:
 - [ ] DOC (altes Word-Format) Support
 
 <!-- KI-WISSEN-START -->
-## KI-Wissen (Canonical in KB)
+## KI-Wissen (Auto-generiert)
 
-> **Canonical:** [KB/REFERENCE/KI_Wissen.md](../../../KB/REFERENCE/KI_Wissen.md) (work-only)
+> **Aktualisiert:** 2026-01-14 11:58
 >
-> **GitHub:** [KB/REFERENCE/KI_Wissen.md](https://github.com/JS-Fenster/KB/blob/master/REFERENCE/KI_Wissen.md)
+> **IMMER einlesen:** `../../../../../KB/REFERENCE/KI_Wissen.md`
 >
 > Enthält aktuelle KI/Automation-News und Tools. Wird wöchentlich automatisch aktualisiert.
 <!-- KI-WISSEN-END -->
