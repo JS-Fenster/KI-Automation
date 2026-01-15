@@ -3,7 +3,7 @@
 **CLAUDE:** Vor SQL-Queries "Spalten-Korrekturen" pruefen! Bei DB-Fehlern: Tabelle erweitern + Changelog updaten.
 
 **Server:** `192.168.16.202\SQLEXPRESS` | **DB:** `WorkM001` | **Port:** 1433
-**Credentials:** `lib/config/credentials.yaml` (SA-User: `Work4all!`)
+**Credentials:** `lib/config/credentials.yaml` (SA-User: `<SA_PASSWORD>` - Passwort aus credentials.yaml oder .env)
 **Python-Lib:** `lib/db_connector.py` (get_db Context Manager)
 
 ---
@@ -274,12 +274,14 @@ cloudflared access tcp --hostname sql.js-fenster-intern.org --url localhost:1433
 
 ```python
 import pymssql
+import os
 
 # Bei Tunnel-Verbindung: localhost statt 192.168.16.202!
+# Passwort aus Environment-Variable oder credentials.yaml laden
 conn = pymssql.connect(
     server='localhost',
     user='sa',
-    password='Work4all!',
+    password=os.getenv('SA_PASSWORD'),  # NICHT hardcoden!
     database='WorkM001'
 )
 ```

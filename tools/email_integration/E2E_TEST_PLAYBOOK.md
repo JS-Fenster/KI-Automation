@@ -1,7 +1,7 @@
 # E-Mail Integration - E2E Test Playbook
 
-**Datum:** 2026-01-13
-**Version:** 4.0 (Subscription Management + Webhook Hardening)
+**Datum:** 2026-01-14
+**Version:** 4.1 (Resource Mismatch Fix)
 
 ---
 
@@ -10,11 +10,11 @@
 ### 1.1 Edge Functions Health Check
 
 ```bash
-# email-webhook (sollte Version 3.2.0 zeigen)
+# email-webhook (sollte Version 3.4.0 zeigen)
 curl -s "https://rsmjgdujlpnydbsfuiek.supabase.co/functions/v1/email-webhook"
 
 # Erwartete Antwort:
-# {"service":"email-webhook","version":"3.2.0","status":"ready","configured":{"azure":true,"supabase":true,"webhookSecret":false,"subscriptionValidation":true}}
+# {"service":"email-webhook","version":"3.4.0","status":"ready","subscriptions":{"count_db":2,"active_count_db":2,"db_healthy":true}}
 
 # process-email (sollte 401 zurueckgeben - JWT required)
 curl -s "https://rsmjgdujlpnydbsfuiek.supabase.co/functions/v1/process-email"
@@ -314,7 +314,7 @@ curl -X POST "https://rsmjgdujlpnydbsfuiek.supabase.co/functions/v1/email-webhoo
 | Test | Status | Notizen |
 |------|--------|---------|
 | **Edge Functions** | | |
-| email-webhook Health Check | ⬜ | Version 3.2.0? subscriptionValidation:true? |
+| email-webhook Health Check | ⬜ | Version 3.4.0? subscriptions.db_healthy:true? |
 | process-email Health Check | ⬜ | 401 Unauthorized? |
 | renew-subscriptions Health Check | ⬜ | Version 1.0.0? |
 | **Datenbank** | | |
@@ -337,5 +337,80 @@ curl -X POST "https://rsmjgdujlpnydbsfuiek.supabase.co/functions/v1/email-webhoo
 
 ---
 
+## 10. Resource Mismatch Regression Test (v3.4.0)
+
+### 10.1 Hintergrund
+
+**Problem (v3.3):** Webhook lehnte ALLE echten Notifications ab wegen "resource mismatch":
+- DB speichert: `/users/info@js-fenster.de/mailFolders/inbox/messages`
+- Graph sendet: `Users/f39679f6-38d2-48b1-9d6f-6e4e6f0f9e98/Messages/<messageId>`
+
+Die Formate sind inkompatibel (Email vs GUID) und koennen nicht verglichen werden.
+
+**Loesung (v3.4):** Intelligente Format-Erkennung:
+- `resourceUsesGuidFormat()`: Erkennt GUID-Muster im Resource-String
+- `resourcesAreComparable()`: Prueft ob beide Formate gleich sind
+- Resource-Vergleich wird uebersprungen wenn Formate unterschiedlich
+
+### 10.2 Simulated Webhook Test
+
+```powershell
+# PowerShell Script: test-webhook-simulation.ps1
+$body = @{
+    value = @(@{
+        subscriptionId = '<AKTIVE_SUBSCRIPTION_ID>'  # aus DB holen
+        changeType = 'created'
+        resource = 'Users/f39679f6-38d2-48b1-9d6f-6e4e6f0f9e98/Messages/AAMkADYzTestMessage123'
+        clientState = 'js-fenster-email-webhook-secret'
+        tenantId = '08af0c7f-e407-4561-91f3-eb29b0d58f2e'
+        resourceData = @{
+            '@odata.type' = '#Microsoft.Graph.Message'
+            '@odata.id' = 'Users/f39679f6-38d2-48b1-9d6f-6e4e6f0f9e98/Messages/AAMkADYzTestMessage123'
+            id = 'AAMkADYzTestMessage123'
+        }
+    })
+} | ConvertTo-Json -Depth 5
+
+Invoke-RestMethod -Uri 'https://rsmjgdujlpnydbsfuiek.supabase.co/functions/v1/email-webhook' -Method Post -ContentType 'application/json' -Body $body
+```
+
+**Erwartete Antwort:**
+```json
+{"status":"accepted","received":1,"processing":1}
+```
+
+**NICHT erwartete Antwort (v3.3 Bug):**
+```json
+{"status":"accepted","received":1,"processing":0}
+// mit Log: "[SEC] resource mismatch..."
+```
+
+### 10.3 Real E-Mail Test
+
+1. Sende eine Test-E-Mail an `info@js-fenster.de`
+2. Warte auf Graph-Notification (max. 30 Sekunden)
+3. Pruefe Logs: Kein "resource mismatch" in [SEC] Eintraegen
+4. Pruefe DB: `processing_status = 'done'`
+
+```sql
+-- Neueste Notifications pruefen
+SELECT email_betreff, processing_status, created_at
+FROM documents
+WHERE dokument_typ = 'email'
+ORDER BY created_at DESC
+LIMIT 3;
+```
+
+### 10.4 Checkliste Regression Test
+
+| Pruefpunkt | Status | Notizen |
+|------------|--------|---------|
+| email-webhook Version 3.4.0 | ⬜ | Health Check |
+| Simulated Test: processing=1 | ⬜ | Kein Reject bei GUID-Format |
+| Real E-Mail: processing_status=done | ⬜ | Echte Notification |
+| Keine "resource mismatch" Logs | ⬜ | Edge Function Logs |
+
+---
+
 *Erstellt: 2026-01-13*
-*Aktualisiert: 2026-01-13 (v4.0 - Subscription Management)*
+*Aktualisiert: 2026-01-14 (v4.1 - Resource Mismatch Fix)*

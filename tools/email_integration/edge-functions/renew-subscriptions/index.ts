@@ -1,6 +1,6 @@
 // =============================================================================
 // Subscription Renewal Edge Function
-// Version: 1.0 - 2026-01-13
+// Version: 1.1 - 2026-01-14
 // =============================================================================
 // Scheduled function to renew Microsoft Graph subscriptions before they expire.
 // Should be called every 12h via pg_cron + pg_net or external scheduler.
@@ -8,6 +8,11 @@
 // - Selects subscriptions expiring within 24h from email_subscriptions table
 // - Renews via Microsoft Graph PATCH /subscriptions/{id}
 // - Updates expires_at and last_renewal_at in DB
+//
+// v1.1 Changes:
+// - Token Hardening: trim() vor Request, sichere Fehlerausgabe
+// - AADSTS error code Parsing mit Diagnose
+// - Nie Secrets loggen
 // =============================================================================
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
@@ -34,6 +39,12 @@ interface TokenResponse {
 
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
+// Extract AADSTS error code from Azure AD error response
+function extractAadErrorCode(errorText: string): string | null {
+  const match = errorText.match(/AADSTS\d+/);
+  return match ? match[0] : null;
+}
+
 async function getAccessToken(): Promise<string> {
   // Check if we have a valid cached token
   if (cachedToken && Date.now() < cachedToken.expiresAt - 60000) {
@@ -44,6 +55,9 @@ async function getAccessToken(): Promise<string> {
     throw new Error("Azure credentials not configured");
   }
 
+  // Hardening: trim whitespace from secret
+  const clientSecret = AZURE_CLIENT_SECRET.trim();
+
   const tokenUrl = `https://login.microsoftonline.com/${AZURE_TENANT_ID}/oauth2/v2.0/token`;
 
   const response = await fetch(tokenUrl, {
@@ -53,7 +67,7 @@ async function getAccessToken(): Promise<string> {
     },
     body: new URLSearchParams({
       client_id: AZURE_CLIENT_ID,
-      client_secret: AZURE_CLIENT_SECRET,
+      client_secret: clientSecret,
       scope: "https://graph.microsoft.com/.default",
       grant_type: "client_credentials",
     }),
@@ -61,7 +75,13 @@ async function getAccessToken(): Promise<string> {
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Failed to get access token: ${error}`);
+    const errorCode = extractAadErrorCode(error);
+    // Safe logging: never log the secret
+    console.error(`[TOKEN] Failed - Tenant: ${AZURE_TENANT_ID}, Client: ${AZURE_CLIENT_ID}, Error: ${errorCode || 'unknown'}`);
+    if (errorCode === "AADSTS7000215") {
+      console.error("[TOKEN] Diagnosis: Invalid client secret (wrong value or expired)");
+    }
+    throw new Error(`Failed to get access token: ${errorCode || error.substring(0, 100)}`);
   }
 
   const data: TokenResponse = await response.json();
@@ -207,7 +227,7 @@ Deno.serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         service: "renew-subscriptions",
-        version: "1.0.0",
+        version: "1.1.0",
         status: "ready",
         configured: {
           azure: !!(AZURE_TENANT_ID && AZURE_CLIENT_ID && AZURE_CLIENT_SECRET),

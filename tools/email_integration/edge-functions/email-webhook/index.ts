@@ -1,9 +1,23 @@
 // =============================================================================
 // E-Mail Webhook - Microsoft Graph Change Notifications
-// Version: 3.1 - 2026-01-13
+// Version: 3.5 - 2026-01-14
 // =============================================================================
 // Empfaengt Notifications von Microsoft Graph wenn neue E-Mails ankommen
 // oder E-Mails gesendet werden.
+//
+// Aenderungen v3.5:
+// - Token Hardening: trim() vor Request, sichere Fehlerausgabe
+// - AADSTS error code Parsing mit Diagnose
+// - Nie Secrets loggen
+//
+// Aenderungen v3.4:
+// - Fix: Resource-Vergleich nur wenn Formate kompatibel (GUID vs Email)
+// - Graph sendet GUID-Format, DB hat Email-Format -> Skip Vergleich
+//
+// Aenderungen v3.3:
+// - Health-Endpoint zeigt subscription_count_db, active_count_db, degraded status
+// - Strengere Validierung: tenantId-Check, resource-Match gegen DB
+// - Detailliertes Logging: Reject-Grund wird immer ausgegeben
 //
 // Aenderungen v3.2:
 // - ImmutableId Header fuer stabile IDs bei Ordner-Verschiebungen
@@ -67,6 +81,12 @@ interface TokenResponse {
 
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
+// Extract AADSTS error code from Azure AD error response
+function extractAadErrorCode(errorText: string): string | null {
+  const match = errorText.match(/AADSTS\d+/);
+  return match ? match[0] : null;
+}
+
 async function getAccessToken(): Promise<string> {
   // Check if we have a valid cached token
   if (cachedToken && Date.now() < cachedToken.expiresAt - 60000) {
@@ -77,6 +97,9 @@ async function getAccessToken(): Promise<string> {
     throw new Error("Azure credentials not configured");
   }
 
+  // Hardening: trim whitespace from secret
+  const clientSecret = AZURE_CLIENT_SECRET.trim();
+
   const tokenUrl = `https://login.microsoftonline.com/${AZURE_TENANT_ID}/oauth2/v2.0/token`;
 
   const response = await fetch(tokenUrl, {
@@ -86,7 +109,7 @@ async function getAccessToken(): Promise<string> {
     },
     body: new URLSearchParams({
       client_id: AZURE_CLIENT_ID,
-      client_secret: AZURE_CLIENT_SECRET,
+      client_secret: clientSecret,
       scope: "https://graph.microsoft.com/.default",
       grant_type: "client_credentials",
     }),
@@ -94,7 +117,13 @@ async function getAccessToken(): Promise<string> {
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Failed to get access token: ${error}`);
+    const errorCode = extractAadErrorCode(error);
+    // Safe logging: never log the secret, only identifiers and error codes
+    console.error(`[TOKEN] Failed - Tenant: ${AZURE_TENANT_ID}, Client: ${AZURE_CLIENT_ID}, Error: ${errorCode || 'unknown'}`);
+    if (errorCode === "AADSTS7000215") {
+      console.error("[TOKEN] Diagnosis: Invalid client secret (wrong value or expired)");
+    }
+    throw new Error(`Failed to get access token: ${errorCode || error.substring(0, 100)}`);
   }
 
   const data: TokenResponse = await response.json();
@@ -373,27 +402,67 @@ async function processNotificationInBackground(
 }
 
 // =============================================================================
-// Security Validation (Change 2 + v3.1 DB validation)
+// Security Validation (Change 2 + v3.1 DB validation + v3.3 strict validation)
+// v3.4: Fix resource mismatch - Graph sends GUID format, DB has email format
 // =============================================================================
 
-// Cache for validated subscription IDs (to avoid repeated DB calls)
-const validatedSubscriptions = new Set<string>();
+// Cache for validated subscriptions: subscriptionId -> { resource }
+const validatedSubscriptions = new Map<string, { resource: string }>();
 
-async function isKnownSubscription(subscriptionId: string): Promise<boolean> {
+// Check if notification resource uses GUID format (not comparable to email format)
+// Graph sends: Users/<guid>/Messages/<id> but subscription uses /users/<email>/mailFolders/...
+function resourceUsesGuidFormat(resource: string): boolean {
+  // GUID pattern: 8-4-4-4-12 hex chars
+  const guidPattern = /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i;
+  return guidPattern.test(resource);
+}
+
+// Check if two resources are comparable (same format)
+function resourcesAreComparable(notificationResource: string, dbResource: string): boolean {
+  const notificationUsesGuid = resourceUsesGuidFormat(notificationResource);
+  const dbUsesGuid = resourceUsesGuidFormat(dbResource);
+  // Only compare if both use same format (both GUID or both email)
+  return notificationUsesGuid === dbUsesGuid;
+}
+
+interface SubscriptionValidationResult {
+  valid: boolean;
+  reason?: string;
+  dbResource?: string;
+}
+
+async function validateSubscriptionInDb(
+  subscriptionId: string,
+  notificationResource?: string
+): Promise<SubscriptionValidationResult> {
   // Check cache first
-  if (validatedSubscriptions.has(subscriptionId)) {
-    return true;
+  const cached = validatedSubscriptions.get(subscriptionId);
+  if (cached) {
+    // v3.4: Only validate resource match if formats are comparable
+    // Graph notifications use GUID format, subscriptions use email format - skip comparison
+    if (notificationResource && cached.resource && resourcesAreComparable(notificationResource, cached.resource)) {
+      const normalizedNotification = normalizeResource(notificationResource);
+      const normalizedDb = normalizeResource(cached.resource);
+      if (normalizedNotification !== normalizedDb) {
+        return {
+          valid: false,
+          reason: `resource mismatch (notification: ${notificationResource}, db: ${cached.resource})`,
+          dbResource: cached.resource,
+        };
+      }
+    }
+    return { valid: true, dbResource: cached.resource };
   }
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     // If DB not configured, skip this check (backwards compatibility)
     console.warn("[SEC] DB not configured - skipping subscription validation");
-    return true;
+    return { valid: true };
   }
 
   try {
     const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/email_subscriptions?subscription_id=eq.${subscriptionId}&is_active=eq.true&select=subscription_id`,
+      `${SUPABASE_URL}/rest/v1/email_subscriptions?subscription_id=eq.${subscriptionId}&is_active=eq.true&select=subscription_id,resource`,
       {
         headers: {
           Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
@@ -405,56 +474,97 @@ async function isKnownSubscription(subscriptionId: string): Promise<boolean> {
     if (!response.ok) {
       console.error(`[SEC] Failed to query subscriptions: ${response.status}`);
       // On error, allow (fail open for availability)
-      return true;
+      return { valid: true };
     }
 
     const results = await response.json();
-    const isKnown = results.length > 0;
 
-    if (isKnown) {
-      // Cache the valid subscription
-      validatedSubscriptions.add(subscriptionId);
+    if (results.length === 0) {
+      return { valid: false, reason: "unknown subscriptionId" };
     }
 
-    return isKnown;
+    const dbSubscription = results[0];
+    const dbResource = dbSubscription.resource;
+
+    // Cache the valid subscription with its resource
+    validatedSubscriptions.set(subscriptionId, { resource: dbResource });
+
+    // v3.4: Only validate resource match if formats are comparable
+    // Graph notifications use GUID format, subscriptions use email format - skip comparison
+    if (notificationResource && dbResource && resourcesAreComparable(notificationResource, dbResource)) {
+      const normalizedNotification = normalizeResource(notificationResource);
+      const normalizedDb = normalizeResource(dbResource);
+      if (normalizedNotification !== normalizedDb) {
+        return {
+          valid: false,
+          reason: `resource mismatch (notification: ${notificationResource}, db: ${dbResource})`,
+          dbResource,
+        };
+      }
+    }
+
+    return { valid: true, dbResource };
   } catch (error) {
     console.error(`[SEC] Subscription validation error: ${error}`);
     // On error, allow (fail open for availability)
-    return true;
+    return { valid: true };
   }
+}
+
+// Normalize resource path for comparison (lowercase, trim trailing slashes)
+function normalizeResource(resource: string): string {
+  return resource.toLowerCase().replace(/\/+$/, "");
+}
+
+interface ValidationResult {
+  valid: boolean;
+  reason?: string;
 }
 
 async function validateRequest(
   req: Request,
   notification?: ChangeNotification
-): Promise<boolean> {
+): Promise<ValidationResult> {
   // Check x-webhook-secret header if configured
   if (EMAIL_WEBHOOK_SECRET) {
     const headerSecret = req.headers.get("x-webhook-secret");
     if (headerSecret !== EMAIL_WEBHOOK_SECRET) {
-      console.warn("[SEC] Invalid x-webhook-secret header");
-      return false;
+      return { valid: false, reason: "invalid x-webhook-secret header" };
     }
   }
 
   // Check clientState in notification payload (Microsoft Graph sends this)
   if (notification && notification.clientState) {
     if (notification.clientState !== EMAIL_WEBHOOK_CLIENT_STATE) {
-      console.warn(`[SEC] Invalid clientState: ${notification.clientState}`);
-      return false;
+      return {
+        valid: false,
+        reason: `clientState mismatch (got: ${notification.clientState})`,
+      };
     }
   }
 
-  // v3.1: Check subscriptionId against email_subscriptions table
+  // v3.3: Check tenantId against expected Azure tenant
+  if (notification && notification.tenantId && AZURE_TENANT_ID) {
+    if (notification.tenantId !== AZURE_TENANT_ID) {
+      return {
+        valid: false,
+        reason: `tenantId mismatch (got: ${notification.tenantId}, expected: ${AZURE_TENANT_ID})`,
+      };
+    }
+  }
+
+  // v3.1 + v3.3: Check subscriptionId and resource against email_subscriptions table
   if (notification && notification.subscriptionId) {
-    const isKnown = await isKnownSubscription(notification.subscriptionId);
-    if (!isKnown) {
-      console.warn(`[SEC] Unknown subscriptionId: ${notification.subscriptionId}`);
-      return false;
+    const result = await validateSubscriptionInDb(
+      notification.subscriptionId,
+      notification.resource
+    );
+    if (!result.valid) {
+      return { valid: false, reason: result.reason };
     }
   }
 
-  return true;
+  return { valid: true };
 }
 
 // =============================================================================
@@ -496,9 +606,10 @@ Deno.serve(async (req: Request) => {
       const validNotifications: ChangeNotification[] = [];
 
       for (const notification of payload.value || []) {
-        // Security check (Change 2 + v3.1)
-        if (!(await validateRequest(req, notification))) {
-          console.warn("Security validation failed - skipping notification");
+        // Security check (Change 2 + v3.1 + v3.3 strict validation)
+        const validation = await validateRequest(req, notification);
+        if (!validation.valid) {
+          console.warn(`[SEC] Rejected notification: ${validation.reason} (subscriptionId: ${notification.subscriptionId})`);
           continue;
         }
 
@@ -556,16 +667,65 @@ Deno.serve(async (req: Request) => {
   // Health Check / Info (GET without validationToken)
   // ==========================================================================
 
+  // Fetch subscription counts from DB for health check
+  let subscriptionCountDb = 0;
+  let subscriptionActiveCountDb = 0;
+  let dbHealthy = false;
+  let dbError: string | null = null;
+
+  if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      const countResp = await fetch(
+        `${SUPABASE_URL}/rest/v1/email_subscriptions?select=subscription_id,is_active`,
+        {
+          headers: {
+            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            apikey: SUPABASE_SERVICE_ROLE_KEY,
+          },
+        }
+      );
+
+      if (countResp.ok) {
+        const rows = await countResp.json();
+        subscriptionCountDb = rows.length;
+        subscriptionActiveCountDb = rows.filter((r: { is_active: boolean }) => r.is_active).length;
+        dbHealthy = true;
+      } else {
+        dbError = `DB query failed: ${countResp.status}`;
+      }
+    } catch (e) {
+      dbError = `DB error: ${e}`;
+    }
+  }
+
+  // Determine overall status
+  let overallStatus = "ready";
+  let statusMessage: string | null = null;
+
+  if (!dbHealthy && SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+    overallStatus = "error";
+    statusMessage = dbError || "Database unreachable";
+  } else if (subscriptionActiveCountDb === 0 && SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+    overallStatus = "degraded";
+    statusMessage = "email_subscriptions empty - run manage-subscriptions.mjs sync";
+  }
+
   return new Response(
     JSON.stringify({
       service: "email-webhook",
-      version: "3.2.0",
-      status: "ready",
+      version: "3.5.0",
+      status: overallStatus,
+      message: statusMessage,
       configured: {
         azure: !!(AZURE_TENANT_ID && AZURE_CLIENT_ID && AZURE_CLIENT_SECRET),
         supabase: !!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY),
         webhookSecret: !!EMAIL_WEBHOOK_SECRET,
         subscriptionValidation: !!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY),
+      },
+      subscriptions: {
+        count_db: subscriptionCountDb,
+        active_count_db: subscriptionActiveCountDb,
+        db_healthy: dbHealthy,
       },
     }),
     {

@@ -550,6 +550,25 @@ GET https://graph.microsoft.com/v1.0/users/{user}/messages/{message-id}/attachme
 
 > ⚠️ **WICHTIG:** Secret vor Ablauf erneuern! Kalender-Erinnerung fuer Juni 2026.
 
+#### Secret VALUE vs Secret ID - WICHTIG!
+
+```
+SECRET VALUE (richtig):    <AZURE_CLIENT_SECRET>
+SECRET ID (FALSCH!):       47337bee-dc0b-4f61-860a-1576db81c6de
+```
+
+| Eigenschaft | Secret VALUE | Secret ID |
+|-------------|--------------|-----------|
+| **Format** | Zufaelliger String mit Sonderzeichen | UUID (8-4-4-4-12 Hex) |
+| **Sichtbarkeit** | NUR beim Erstellen sichtbar | Immer sichtbar |
+| **Verwendung** | `AZURE_CLIENT_SECRET` | Nur zur Identifikation |
+| **Fehler bei Verwechslung** | - | AADSTS7000215 (invalid_client) |
+
+**Diagnose bei AADSTS7000215:**
+```bash
+node manage-subscriptions.mjs test-token
+```
+
 ### API Permissions (Application)
 
 | Permission | Typ | Admin Consent |

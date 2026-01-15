@@ -1,12 +1,17 @@
 // =============================================================================
 // Process Email - GPT Categorization + Attachment Handling
-// Version: 2.0 - 2026-01-13
+// Version: 2.2 - 2026-01-14
 // =============================================================================
 // Wird von email-webhook aufgerufen nachdem E-Mail in DB gespeichert wurde.
 // Funktionen:
 // - GPT-5.2 Kategorisierung basierend auf Betreff/Body
 // - Anhang-Verarbeitung mit Whitelist
 // - Weiterleitung an process-document fuer OCR
+//
+// v2.2 Changes:
+// - Token Hardening: trim() vor Request, sichere Fehlerausgabe
+// - AADSTS error code Parsing mit Diagnose
+// - Nie Secrets loggen
 //
 // v2.1 Changes:
 // - ImmutableId Header fuer stabile IDs bei Ordner-Verschiebungen
@@ -125,6 +130,12 @@ interface TokenResponse {
 
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
+// Extract AADSTS error code from Azure AD error response
+function extractAadErrorCode(errorText: string): string | null {
+  const match = errorText.match(/AADSTS\d+/);
+  return match ? match[0] : null;
+}
+
 async function getAccessToken(): Promise<string> {
   if (cachedToken && Date.now() < cachedToken.expiresAt - 60000) {
     return cachedToken.token;
@@ -134,6 +145,9 @@ async function getAccessToken(): Promise<string> {
     throw new Error("Azure credentials not configured");
   }
 
+  // Hardening: trim whitespace from secret
+  const clientSecret = AZURE_CLIENT_SECRET.trim();
+
   const tokenUrl = `https://login.microsoftonline.com/${AZURE_TENANT_ID}/oauth2/v2.0/token`;
 
   const response = await fetch(tokenUrl, {
@@ -141,14 +155,21 @@ async function getAccessToken(): Promise<string> {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       client_id: AZURE_CLIENT_ID,
-      client_secret: AZURE_CLIENT_SECRET,
+      client_secret: clientSecret,
       scope: "https://graph.microsoft.com/.default",
       grant_type: "client_credentials",
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to get access token: ${await response.text()}`);
+    const error = await response.text();
+    const errorCode = extractAadErrorCode(error);
+    // Safe logging: never log the secret
+    console.error(`[TOKEN] Failed - Tenant: ${AZURE_TENANT_ID}, Client: ${AZURE_CLIENT_ID}, Error: ${errorCode || 'unknown'}`);
+    if (errorCode === "AADSTS7000215") {
+      console.error("[TOKEN] Diagnosis: Invalid client secret (wrong value or expired)");
+    }
+    throw new Error(`Failed to get access token: ${errorCode || error.substring(0, 100)}`);
   }
 
   const data: TokenResponse = await response.json();
@@ -535,7 +556,7 @@ Deno.serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         service: "process-email",
-        version: "2.1.0",
+        version: "2.2.0",
         status: "ready",
         configured: {
           azure: !!(AZURE_TENANT_ID && AZURE_CLIENT_ID && AZURE_CLIENT_SECRET),
