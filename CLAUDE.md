@@ -2,6 +2,8 @@
 
 > **Repo:** `https://github.com/JS-Fenster/KI-Automation.git`
 > **Zweck:** Shared Libraries, Tools, Wissensdatenbanken - nutzbar fuer Firma + Privat
+>
+> **Start:** Immer ueber `C:\Claude_Workspace\Claude_Start.bat` (NICHT Desktop\Claude!)
 
 ---
 
