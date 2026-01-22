@@ -1,5 +1,5 @@
 {
-  "analyzed_at": "2026-01-14T11:58:17.497270",
+  "analyzed_at": "2026-01-22T13:43:04.568290",
   "total_topics": 69,
   "low_coverage_topics": [
     {
@@ -14,8 +14,13 @@
     },
     {
       "topic": "haiku",
-      "count": 0,
+      "count": 1,
       "search_suggestion": "haiku RSS feed blog 2025"
+    },
+    {
+      "topic": "mcp",
+      "count": 0,
+      "search_suggestion": "mcp RSS feed blog 2025"
     },
     {
       "topic": "model context protocol",
@@ -38,29 +43,19 @@
       "search_suggestion": "ocr RSS feed blog 2025"
     },
     {
-      "topic": "pdf",
-      "count": 0,
-      "search_suggestion": "pdf RSS feed blog 2025"
-    },
-    {
       "topic": "image recognition",
       "count": 0,
       "search_suggestion": "image recognition RSS feed blog 2025"
     },
     {
       "topic": "zapier",
-      "count": 1,
+      "count": 0,
       "search_suggestion": "zapier RSS feed blog 2025"
     },
     {
-      "topic": "langgraph",
+      "topic": "sdk",
       "count": 1,
-      "search_suggestion": "langgraph RSS feed blog 2025"
-    },
-    {
-      "topic": "speech",
-      "count": 0,
-      "search_suggestion": "speech RSS feed blog 2025"
+      "search_suggestion": "sdk RSS feed blog 2025"
     },
     {
       "topic": "whisper",
@@ -84,12 +79,12 @@
     },
     {
       "topic": "fine-tune",
-      "count": 0,
+      "count": 1,
       "search_suggestion": "fine-tune RSS feed blog 2025"
     },
     {
       "topic": "lora",
-      "count": 0,
+      "count": 1,
       "search_suggestion": "lora RSS feed blog 2025"
     },
     {
@@ -173,11 +168,6 @@
       "search_suggestion": "text to speech RSS feed blog 2025"
     },
     {
-      "topic": "tts",
-      "count": 0,
-      "search_suggestion": "tts RSS feed blog 2025"
-    },
-    {
       "topic": "make.com",
       "count": 0,
       "search_suggestion": "make.com RSS feed blog 2025"
@@ -193,36 +183,34 @@
       "search_suggestion": "power automate RSS feed blog 2025"
     }
   ],
-  "broken_sources": [
-    "venturebeat_ai"
-  ],
+  "broken_sources": [],
   "well_covered_topics": [
     {
       "topic": "agent",
-      "count": 35
-    },
-    {
-      "topic": "api",
-      "count": 20
-    },
-    {
-      "topic": "rag",
-      "count": 17
+      "count": 42
     },
     {
       "topic": "workflow",
       "count": 14
     },
     {
-      "topic": "llama",
+      "topic": "rag",
+      "count": 14
+    },
+    {
+      "topic": "api",
       "count": 11
     },
     {
-      "topic": "agentic",
+      "topic": "llama",
       "count": 10
     },
     {
-      "topic": "vision",
+      "topic": "claude",
+      "count": 10
+    },
+    {
+      "topic": "windsurf",
       "count": 9
     },
     {
@@ -230,33 +218,25 @@
       "count": 9
     },
     {
-      "topic": "gemini",
-      "count": 8
+      "topic": "agentic",
+      "count": 7
     },
     {
-      "topic": "windsurf",
-      "count": 8
+      "topic": "anthropic",
+      "count": 7
     }
   ],
   "recommendations": [
     {
       "type": "search_new_sources",
-      "message": "38 Topics haben geringe Abdeckung",
+      "message": "36 Topics haben geringe Abdeckung",
       "action": "Claude sollte nach neuen RSS-Feeds für diese Topics suchen",
       "topics": [
         "sonnet",
         "opus",
         "haiku",
-        "model context protocol",
-        "tool use"
-      ]
-    },
-    {
-      "type": "fix_broken_sources",
-      "message": "1 Quellen haben Fehler",
-      "action": "URLs prüfen oder alternative Feeds suchen",
-      "sources": [
-        "venturebeat_ai"
+        "mcp",
+        "model context protocol"
       ]
     }
   ]
