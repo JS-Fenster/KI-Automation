@@ -270,7 +270,7 @@ Die `KB/REFERENCE/KI_Wissen.md` wird woechentlich aktualisiert via:
 <!-- KI-WISSEN-START -->
 ## KI-Wissen (Auto-generiert)
 
-> **Aktualisiert:** 2026-01-14 11:58
+> **Aktualisiert:** 2026-01-18 03:00
 >
 > **IMMER einlesen:** `../../../../../KB/REFERENCE/KI_Wissen.md`
 >

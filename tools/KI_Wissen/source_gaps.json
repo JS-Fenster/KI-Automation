@@ -1,7 +1,12 @@
 {
-  "analyzed_at": "2026-01-14T11:58:17.497270",
+  "analyzed_at": "2026-01-18T03:00:10.110914",
   "total_topics": 69,
   "low_coverage_topics": [
+    {
+      "topic": "claude code",
+      "count": 1,
+      "search_suggestion": "claude code RSS feed blog 2025"
+    },
     {
       "topic": "sonnet",
       "count": 1,
@@ -14,7 +19,7 @@
     },
     {
       "topic": "haiku",
-      "count": 0,
+      "count": 1,
       "search_suggestion": "haiku RSS feed blog 2025"
     },
     {
@@ -31,11 +36,6 @@
       "topic": "function calling",
       "count": 0,
       "search_suggestion": "function calling RSS feed blog 2025"
-    },
-    {
-      "topic": "ocr",
-      "count": 1,
-      "search_suggestion": "ocr RSS feed blog 2025"
     },
     {
       "topic": "pdf",
@@ -76,11 +76,6 @@
       "topic": "gpt-4",
       "count": 1,
       "search_suggestion": "gpt-4 RSS feed blog 2025"
-    },
-    {
-      "topic": "mistral",
-      "count": 1,
-      "search_suggestion": "mistral RSS feed blog 2025"
     },
     {
       "topic": "fine-tune",
@@ -149,7 +144,7 @@
     },
     {
       "topic": "elevenlabs",
-      "count": 1,
+      "count": 0,
       "search_suggestion": "elevenlabs RSS feed blog 2025"
     },
     {
@@ -199,30 +194,26 @@
   "well_covered_topics": [
     {
       "topic": "agent",
-      "count": 35
-    },
-    {
-      "topic": "api",
-      "count": 20
-    },
-    {
-      "topic": "rag",
-      "count": 17
+      "count": 32
     },
     {
       "topic": "workflow",
-      "count": 14
-    },
-    {
-      "topic": "llama",
       "count": 11
     },
     {
-      "topic": "agentic",
+      "topic": "api",
       "count": 10
     },
     {
-      "topic": "vision",
+      "topic": "rag",
+      "count": 10
+    },
+    {
+      "topic": "llama",
+      "count": 9
+    },
+    {
+      "topic": "windsurf",
       "count": 9
     },
     {
@@ -230,25 +221,29 @@
       "count": 9
     },
     {
-      "topic": "gemini",
-      "count": 8
+      "topic": "agentic",
+      "count": 7
     },
     {
-      "topic": "windsurf",
-      "count": 8
+      "topic": "gemini",
+      "count": 7
+    },
+    {
+      "topic": "llamaindex",
+      "count": 7
     }
   ],
   "recommendations": [
     {
       "type": "search_new_sources",
-      "message": "38 Topics haben geringe Abdeckung",
+      "message": "37 Topics haben geringe Abdeckung",
       "action": "Claude sollte nach neuen RSS-Feeds für diese Topics suchen",
       "topics": [
+        "claude code",
         "sonnet",
         "opus",
         "haiku",
-        "model context protocol",
-        "tool use"
+        "model context protocol"
       ]
     },
     {
