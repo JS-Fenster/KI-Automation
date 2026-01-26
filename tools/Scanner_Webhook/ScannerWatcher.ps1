@@ -1,6 +1,16 @@
-# ScannerWatcher.ps1
-# Ueberwacht einen Ordner auf neue Dateien und sendet diese per Webhook
-# Fuer den Einsatz auf dem Server - dort den lokalen Pfad anpassen!
+# =============================================================================
+# ScannerWatcher.ps1 - Scanner Ordner Webhook
+# Version: 2.0 - 2026-01-15
+# =============================================================================
+# Aenderungen v2.0:
+# - API-Key Authentifizierung (SCANNER_WEBHOOK_API_KEY Environment Variable)
+# - Klarer ERROR-Log wenn API-Key fehlt (kein silent fail)
+# - HTTP-Retry mit Exponential Backoff (3 Versuche)
+# - Health-Check Logging bei Start
+#
+# Aenderungen v1.0:
+# - Initial Release (2026-01-12)
+# =============================================================================
 
 # ============ KONFIGURATION ============
 # WICHTIG: Auf dem Server den lokalen Pfad verwenden (z.B. "D:\Scanner" oder "C:\Scanner")
@@ -8,6 +18,14 @@ $WatchFolder = "D:\Daten\Dokumente\Scanner"
 $WebhookUrl = "https://rsmjgdujlpnydbsfuiek.supabase.co/functions/v1/process-document"
 $LogFile = "$PSScriptRoot\scanner_webhook.log"
 $ProcessedFile = "$PSScriptRoot\processed_files.txt"
+
+# v2.0: API-Key aus Environment Variable (PFLICHT!)
+# Muss denselben Wert haben wie INTERNAL_API_KEY in der Edge Function
+$ApiKey = $env:SCANNER_WEBHOOK_API_KEY
+
+# v2.0: Retry-Konfiguration
+$MaxHttpRetries = 3
+$InitialRetryDelaySec = 2
 # =======================================
 
 function Write-Log {
@@ -20,6 +38,14 @@ function Write-Log {
 
 function Send-FileToWebhook {
     param([string]$FilePath)
+
+    # v2.0: API-Key Validierung - KEIN silent fail!
+    if (-not $ApiKey) {
+        Write-Log "ERROR [AUTH]: SCANNER_WEBHOOK_API_KEY Environment Variable nicht gesetzt!"
+        Write-Log "ERROR [AUTH]: Bitte setzen mit: [Environment]::SetEnvironmentVariable('SCANNER_WEBHOOK_API_KEY', 'KEY', 'Machine')"
+        Write-Log "ERROR [AUTH]: Datei wird NICHT gesendet: $FilePath"
+        return $false
+    }
 
     try {
         # Warte kurz, bis die Datei vollstaendig geschrieben ist
@@ -93,16 +119,55 @@ function Send-FileToWebhook {
         [System.Buffer]::BlockCopy($fileBytes, 0, $requestBody, $bodyStart.Length, $fileBytes.Length)
         [System.Buffer]::BlockCopy($bodyEnd, 0, $requestBody, $bodyStart.Length + $fileBytes.Length, $bodyEnd.Length)
 
-        # HTTP Request senden
+        # v2.0: HTTP Headers MIT API-Key
         $headers = @{
             "Content-Type" = "multipart/form-data; boundary=$boundary"
+            "x-api-key" = $ApiKey
         }
 
         Write-Log "Sende Datei: $fileName ($('{0:N2}' -f ($fileBytes.Length / 1KB)) KB)"
 
-        $response = Invoke-RestMethod -Uri $WebhookUrl -Method Post -Body $requestBody -Headers $headers -ContentType "multipart/form-data; boundary=$boundary"
+        # v2.0: HTTP-Retry mit Exponential Backoff
+        $currentRetryDelay = $InitialRetryDelaySec
+        $response = $null
+        $lastError = $null
 
-        Write-Log "ERFOLG: $fileName gesendet. Response: $($response | ConvertTo-Json -Compress)"
+        for ($httpRetry = 1; $httpRetry -le $MaxHttpRetries; $httpRetry++) {
+            try {
+                $response = Invoke-RestMethod -Uri $WebhookUrl -Method Post -Body $requestBody -Headers $headers -ContentType "multipart/form-data; boundary=$boundary" -TimeoutSec 120
+                # Erfolg - Schleife verlassen
+                break
+            }
+            catch {
+                $lastError = $_
+                $statusCode = $_.Exception.Response.StatusCode.value__
+
+                # v2.0: Bei 401 (Auth-Fehler) NICHT retrien - ist sinnlos
+                if ($statusCode -eq 401) {
+                    Write-Log "ERROR [AUTH]: 401 Unauthorized - API-Key ungueltig oder nicht akzeptiert"
+                    Write-Log "ERROR [AUTH]: Pruefe ob SCANNER_WEBHOOK_API_KEY == INTERNAL_API_KEY der Edge Function"
+                    throw
+                }
+
+                if ($httpRetry -lt $MaxHttpRetries) {
+                    Write-Log "HTTP-Fehler (Versuch $httpRetry/$MaxHttpRetries): Status=$statusCode - Retry in ${currentRetryDelay}s"
+                    Start-Sleep -Seconds $currentRetryDelay
+                    $currentRetryDelay = $currentRetryDelay * 2  # Exponential Backoff
+                }
+                else {
+                    Write-Log "HTTP-Fehler: Alle $MaxHttpRetries Versuche fehlgeschlagen"
+                    throw
+                }
+            }
+        }
+
+        # Erfolg pruefen
+        if ($response.success -eq $false -and $response.duplicate -eq $true) {
+            Write-Log "DUPLIKAT: $fileName - bereits verarbeitet (Original: $($response.duplicate_of))"
+        }
+        else {
+            Write-Log "ERFOLG: $fileName gesendet. Response: $($response | ConvertTo-Json -Compress)"
+        }
 
         # Datei als verarbeitet markieren
         Add-Content -Path $ProcessedFile -Value $FilePath -Encoding UTF8
@@ -117,10 +182,51 @@ function Send-FileToWebhook {
 
 function Start-FolderWatcher {
     Write-Log "=========================================="
-    Write-Log "Scanner Watcher gestartet"
+    Write-Log "Scanner Watcher v2.0 gestartet"
     Write-Log "Ueberwache: $WatchFolder"
     Write-Log "Webhook: $WebhookUrl"
     Write-Log "=========================================="
+
+    # v2.0: API-Key Validierung beim Start - KRITISCH!
+    if (-not $ApiKey) {
+        Write-Log "=========================================="
+        Write-Log "ERROR [STARTUP]: SCANNER_WEBHOOK_API_KEY nicht gesetzt!"
+        Write-Log "ERROR [STARTUP]: Watcher wird NICHT gestartet."
+        Write-Log ""
+        Write-Log "Loesung (als Admin ausfuehren):"
+        Write-Log '  [Environment]::SetEnvironmentVariable("SCANNER_WEBHOOK_API_KEY", "DEIN_KEY", "Machine")'
+        Write-Log ""
+        Write-Log "Danach: Scheduled Task neu starten oder PC neu starten."
+        Write-Log "=========================================="
+        exit 1
+    }
+    else {
+        # Safe Logging: Nur ersten/letzten Teil des Keys zeigen
+        $keyPreview = $ApiKey.Substring(0, [Math]::Min(4, $ApiKey.Length)) + "***" + $ApiKey.Substring([Math]::Max(0, $ApiKey.Length - 4))
+        Write-Log "API-Key konfiguriert: $keyPreview"
+    }
+
+    # v2.0: Health-Check der Edge Function beim Start
+    Write-Log "Pruefe Edge Function Health..."
+    try {
+        $healthHeaders = @{ "x-api-key" = $ApiKey }
+        $health = Invoke-RestMethod -Uri $WebhookUrl -Method Get -Headers $healthHeaders -TimeoutSec 10
+        Write-Log "Edge Function Status: $($health.status) (v$($health.version))"
+        if ($health.status -ne "ready") {
+            Write-Log "WARNUNG: Edge Function nicht 'ready' - Status: $($health.status)"
+        }
+    }
+    catch {
+        $statusCode = $_.Exception.Response.StatusCode.value__
+        if ($statusCode -eq 401) {
+            Write-Log "ERROR [STARTUP]: Health-Check 401 Unauthorized - API-Key ungueltig!"
+            Write-Log "ERROR [STARTUP]: SCANNER_WEBHOOK_API_KEY stimmt nicht mit INTERNAL_API_KEY ueberein."
+            exit 1
+        }
+        else {
+            Write-Log "WARNUNG: Health-Check fehlgeschlagen ($statusCode) - Watcher startet trotzdem"
+        }
+    }
 
     # Pruefe ob Ordner existiert
     if (-not (Test-Path $WatchFolder)) {

@@ -1,9 +1,39 @@
 # Scanner Webhook Automatisierung
 
 > **Status:** Produktiv (seit 2026-01-12)
+> **Version:** 2.0 (2026-01-15)
 > **Ziel:** Supabase Edge Function `process-document`
 
 Ueberwacht den Scanner-Ordner und sendet neue Dateien automatisch an die Supabase Edge Function zur Dokumentenverarbeitung.
+
+---
+
+## WICHTIG: API-Key Konfiguration (v2.0)
+
+Die Edge Function `process-document` erfordert einen API-Key. Dieser muss als **Environment Variable** auf dem Server gesetzt werden.
+
+### 1. API-Key setzen (einmalig, als Admin)
+
+```powershell
+# PowerShell als Administrator oeffnen
+[Environment]::SetEnvironmentVariable("SCANNER_WEBHOOK_API_KEY", "DEIN_INTERNAL_API_KEY", "Machine")
+```
+
+**WICHTIG:** Der Wert muss identisch sein mit `INTERNAL_API_KEY` in der Supabase Edge Function!
+
+### 2. Scheduled Task neu starten
+
+```powershell
+Stop-ScheduledTask -TaskName 'ScannerWebhookWatcher'
+Start-ScheduledTask -TaskName 'ScannerWebhookWatcher'
+```
+
+### 3. Pruefen ob Key geladen wurde
+
+```powershell
+# Log anzeigen - sollte "API-Key konfiguriert: XXXX***XXXX" zeigen
+Get-Content C:\Scripts\Scanner_Webhook\scanner_webhook.log -Tail 20
+```
 
 ---
 
@@ -174,7 +204,8 @@ In `ScannerWatcher.ps1` die Variable `$WebhookUrl` anpassen.
 | 2025-12-20 | Erster Entwurf mit n8n Webhook |
 | 2025-12-27 | Umstellung auf Supabase Edge Function geplant |
 | 2026-01-12 | **Produktiv:** Scanner → Edge Function Pipeline abgeschlossen |
+| 2026-01-15 | **v2.0:** API-Key Auth (SCANNER_WEBHOOK_API_KEY), HTTP-Retry mit Backoff, Health-Check |
 
 ---
 
-*Zuletzt aktualisiert: 2026-01-12*
+*Zuletzt aktualisiert: 2026-01-15*
